@@ -217,6 +217,12 @@
                             this.log.DebugFormat("Retrieved cache item with key '{0}' and type '{1}'. It expires at {2}", key, typeof(T), expires);
                             this.log.InfoFormat("RedisCacheHandler.GetCacheItem<{2}>({1}) Time: {0}s", DateTime.Now.Subtract(start).TotalSeconds, key, typeof(T));
 
+                            // Set expiry date if applicable
+                            if (typeof(IExpires).IsAssignableFrom(typeof(T)))
+                            {
+                                ((IExpires)result).Expires = expires;
+                            }
+
                             return new CacheItem<T>(key, result, expires);
                         }
                     }
