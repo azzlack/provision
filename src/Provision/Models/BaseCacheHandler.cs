@@ -55,16 +55,25 @@
         /// <returns>A cache item key.</returns>
         public virtual string CreateKey<T>(params object[] segments)
         {
+            return this.CreateKey(segments);
+        }
+
+        /// <summary>
+        /// Creates a cache item key from the specified segments.
+        /// </summary>
+        /// <param name="segments">The key segments.</param>
+        /// <returns>A cache item key.</returns>
+        public virtual string CreateKey(params object[] segments)
+        {
             return string.Join("", segments);
         }
 
         /// <summary>
         /// Checks if an item with the specified key exists in the cache.
         /// </summary>
-        /// <typeparam name="T">The item type.</typeparam>
         /// <param name="key">The key.</param>
         /// <returns><c>true</c> if a cache item exists, <c>false</c> otherwise.</returns>
-        public virtual async Task<bool> Contains<T>(string key)
+        public virtual async Task<bool> Contains(string key)
         {
             return false;
         }
@@ -119,10 +128,9 @@
         /// <summary>
         /// Removes the cache item with the specified key.
         /// </summary>
-        /// <typeparam name="T">The item type.</typeparam>
         /// <param name="key">The key.</param>
         /// <returns><c>True</c> if successful, <c>false</c> otherwise.</returns>
-        public virtual async Task<bool> Remove<T>(string key)
+        public virtual async Task<bool> Remove(string key)
         {
             return false;
         }

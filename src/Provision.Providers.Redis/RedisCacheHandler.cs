@@ -85,7 +85,7 @@
         /// <typeparam name="T">The type to create a cache key for.</typeparam>
         /// <param name="segments">The key segments.</param>
         /// <returns>A cache item key.</returns>
-        public override string CreateKey<T>(params object[] segments)
+        public override string CreateKey(params object[] segments)
         {
             var key = string.Format("{0}:{1}", this.configuration.Prefix, string.Join(":", segments.Select(x => x.ToString().Replace(':', '-'))));
 
@@ -100,10 +100,9 @@
         /// <summary>
         /// Checks if an item with the specified key exists in the cache.
         /// </summary>
-        /// <typeparam name="T">The item type.</typeparam>
         /// <param name="key">The key.</param>
         /// <returns><c>true</c> if a cache item exists, <c>false</c> otherwise.</returns>
-        public override async Task<bool> Contains<T>(string key)
+        public override async Task<bool> Contains(string key)
         {
             var start = DateTime.Now;
 
@@ -374,11 +373,10 @@
         /// <summary>
         /// Removes the cache item with the specified key.
         /// </summary>
-        /// <typeparam name="T">The item type.</typeparam>
         /// <param name="key">The key.</param>
         /// <returns><c>True</c> if successful, <c>false</c> otherwise.</returns>
         /// <exception cref="System.ArgumentException">Error when removing key from database</exception>
-        public override async Task<bool> Remove<T>(string key)
+        public override async Task<bool> Remove(string key)
         {
             var start = DateTime.Now;
 
@@ -423,10 +421,9 @@
             }
 
             this.log.InfoFormat(
-                "RedisCacheHandler.Remove<{2}>({1}) Time: {0}s",
+                "RedisCacheHandler.Remove({1}) Time: {0}s",
                 DateTime.Now.Subtract(start).TotalSeconds,
-                key,
-                typeof(T));
+                key);
 
             return removed;
         }

@@ -44,7 +44,7 @@
 
             await this.cacheHandler.AddOrUpdate(key, d, DateTime.Now.AddDays(1));
 
-            var r = await this.cacheHandler.Contains<Report>("report_k4");
+            var r = await this.cacheHandler.Contains("report_k4");
 
             Assert.IsTrue(r);
         }
@@ -58,7 +58,7 @@
 
             await this.cacheHandler.AddOrUpdate(key, d);
 
-            var r = await this.cacheHandler.Contains<Report>("reports_blahblah_k4_2014");
+            var r = await this.cacheHandler.Contains("reports_blahblah_k4_2014");
 
             Assert.IsTrue(r);
         }
@@ -123,9 +123,9 @@
 
             await this.cacheHandler.AddOrUpdate(key, d);
 
-            await this.cacheHandler.Remove<Report>(key);
+            await this.cacheHandler.Remove(key);
 
-            var exists = await this.cacheHandler.Contains<Report>(key);
+            var exists = await this.cacheHandler.Contains(key);
 
             Assert.IsFalse(exists);
         }
@@ -139,13 +139,13 @@
 
             await this.cacheHandler.AddOrUpdate(key, d);
 
-            var r1 = await this.cacheHandler.Contains<Report>("reports_football_k4_2014");
+            var r1 = await this.cacheHandler.Contains("reports_football_k4_2014");
 
             Assert.IsTrue(r1);
 
             var p = await this.cacheHandler.Purge();
 
-            var r2 = await this.cacheHandler.Contains<Report>("reports_football_k4_2014");
+            var r2 = await this.cacheHandler.Contains("reports_football_k4_2014");
 
             Assert.IsFalse(r2);
         }

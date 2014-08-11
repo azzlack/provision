@@ -15,12 +15,6 @@
         ICacheHandlerConfiguration Configuration { get; set; }
 
         /// <summary>
-        /// Gets or sets the configuration.
-        /// </summary>
-        /// <value>The configuration.</value>
-        //ICacheHandlerProviderConfiguration Configuration { get; set; }
-
-        /// <summary>
         /// Creates a cache item key from the specified segments.
         /// </summary>
         /// <typeparam name="T">The type to create a cache key for.</typeparam>
@@ -29,12 +23,18 @@
         string CreateKey<T>(params object[] segments);
 
         /// <summary>
+        /// Creates a cache item key from the specified segments.
+        /// </summary>
+        /// <param name="segments">The key segments.</param>
+        /// <returns>A cache item key.</returns>
+        string CreateKey(params object[] segments);
+
+        /// <summary>
         /// Checks if an item with the specified key exists in the cache.
         /// </summary>
-        /// <typeparam name="T">The item type.</typeparam>
         /// <param name="key">The key.</param>
         /// <returns><c>true</c> if a cache item exists, <c>false</c> otherwise.</returns>
-        Task<bool> Contains<T>(string key);
+        Task<bool> Contains(string key);
 
         /// <summary>
         /// Gets the cache item with specified key.
@@ -74,10 +74,9 @@
         /// <summary>
         /// Removes the cache item with the specified key.
         /// </summary>
-        /// <typeparam name="T">The item type.</typeparam>
         /// <param name="key">The key.</param>
         /// <returns><c>True</c> if successful, <c>false</c> otherwise.</returns>
-        Task<bool> Remove<T>(string key);
+        Task<bool> Remove(string key);
 
         /// <summary>
         /// Purges all cache items.

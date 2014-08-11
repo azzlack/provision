@@ -47,7 +47,7 @@
 
             await Task.Delay(1000);
 
-            var r = await this.cacheHandler.Contains<Report>("provision:xyz:1#k4");
+            var r = await this.cacheHandler.Contains("provision:xyz:1#k4");
 
             Assert.IsTrue(r);
         }
@@ -63,13 +63,13 @@
                             }
             };
 
-            var key = string.Format("{0}#{1}", this.cacheHandler.CreateKey<Report>("delivery", "2"), "k4");
+            var key = string.Format("{0}#{1}", this.cacheHandler.CreateKey("delivery", "2"), "k4");
 
             await this.cacheHandler.AddOrUpdate(key, d);
 
             await Task.Delay(1000);
 
-            var r = await this.cacheHandler.Contains<Report>("provision:delivery:2#k4");
+            var r = await this.cacheHandler.Contains("provision:delivery:2#k4");
 
             Assert.IsTrue(r);
         }
@@ -85,7 +85,7 @@
 
             await Task.Delay(1000);
 
-            var r = await this.cacheHandler.Contains<Report>("provision:reports:delivery:k4:2014");
+            var r = await this.cacheHandler.Contains("provision:reports:delivery:k4:2014");
 
             Assert.IsTrue(r);
         }
@@ -101,11 +101,11 @@
 
             await Task.Delay(1000);
 
-            await this.cacheHandler.Remove<Report>(key);
+            await this.cacheHandler.Remove(key);
 
             await Task.Delay(1000);
 
-            var exists = await this.cacheHandler.Contains<Report>(key);
+            var exists = await this.cacheHandler.Contains(key);
 
             Assert.IsFalse(exists);
         }
@@ -121,11 +121,11 @@
 
             await Task.Delay(1000);
 
-            await this.cacheHandler.Remove<Report>(key);
+            await this.cacheHandler.Remove(key);
 
             await Task.Delay(1000);
 
-            var exists = await this.cacheHandler.Contains<Report>(key);
+            var exists = await this.cacheHandler.Contains(key);
 
             Assert.IsFalse(exists);
         }
@@ -164,7 +164,7 @@
                             }
             };
 
-            var key = this.cacheHandler.CreateKey<Report>("reports", "beans", "k4", "2014");
+            var key = this.cacheHandler.CreateKey("reports", "beans", "k4", "2014");
 
             await this.cacheHandler.AddOrUpdate(key, d);
 
@@ -187,7 +187,7 @@
 
             await Task.Delay(1000);
 
-            var r1 = await this.cacheHandler.Contains<Report>("provision:reports:monthlyconsumption:k4:2014");
+            var r1 = await this.cacheHandler.Contains("provision:reports:monthlyconsumption:k4:2014");
 
             Assert.IsTrue(r1);
 
@@ -195,7 +195,7 @@
 
             await Task.Delay(1000);
 
-            var r2 = await this.cacheHandler.Contains<Report>("provision:reports:monthlyconsumption:k4:2014");
+            var r2 = await this.cacheHandler.Contains("provision:reports:monthlyconsumption:k4:2014");
 
             Assert.IsFalse(r2);
         }
