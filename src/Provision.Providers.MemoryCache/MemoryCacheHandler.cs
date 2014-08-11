@@ -4,6 +4,7 @@
     using System.Runtime.Caching;
     using System.Threading.Tasks;
 
+    using Provision.Extensions;
     using Provision.Interfaces;
     using Provision.Models;
 
@@ -64,6 +65,9 @@
 
             if (item != null)
             {
+                // Set expiry date if applicable
+                item.MergeExpire();
+
                 if (item.Expires == DateTime.MinValue)
                 {
                     return item;
@@ -78,19 +82,6 @@
             }
 
             return CacheItem<T>.Empty(key);
-        }
-
-        /// <summary>
-        /// Gets the cache item value with the specified key.
-        /// </summary>
-        /// <typeparam name="T">The item type.</typeparam>
-        /// <param name="key">The key.</param>
-        /// <returns>The cache item.</returns>
-        public override async Task<T> GetValue<T>(string key)
-        {
-            var item = await this.Get<T>(key);
-
-            return item.HasValue ? item.Value : default(T);
         }
 
         /// <summary>
@@ -128,7 +119,7 @@
                     this.cache.Set(key, new CacheItem<T>(key, item, expires.DateTime), expires);
                 }
 
-                if (typeof(IExpires).IsAssignableFrom(typeof(T)))
+                if (typeof(IExpires).IsAssignableFrom(typeof(T)) && expires.DateTime > DateTime.Now)
                 {
                     ((IExpires)item).Expires = expires.DateTime;
                 }

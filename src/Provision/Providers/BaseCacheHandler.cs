@@ -1,8 +1,10 @@
 ﻿namespace Provision.Providers
 {
     using System;
+    using System.Reflection;
     using System.Threading.Tasks;
 
+    using Provision.Extensions;
     using Provision.Interfaces;
     using Provision.Quartz;
 
@@ -97,6 +99,16 @@
         /// <returns>The cache item.</returns>
         public virtual async Task<T> GetValue<T>(string key)
         {
+            var item = await this.Get<T>(key);
+
+            if (item != null && item.HasValue)
+            {
+                // Set expiry date if applicable
+                item.MergeExpire();
+
+                return item.Value;
+            }
+
             return default(T);
         }
 

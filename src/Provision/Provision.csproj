@@ -61,6 +61,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Extensions\IExpiresExtensions.cs" />
     <Compile Include="Interfaces\ICacheHandler.cs" />
     <Compile Include="Interfaces\ICacheHandlerConfiguration.cs" />
     <Compile Include="Interfaces\ICacheItem.cs" />

@@ -5,6 +5,7 @@
     using System.Reflection;
     using System.Threading.Tasks;
 
+    using Provision.Extensions;
     using Provision.Interfaces;
     using Provision.Models;
     using Provision.Providers.PortableMemoryCache.Mono;
@@ -68,6 +69,9 @@
 
                 if (item != null)
                 {
+                    // Set expiry date if applicable
+                    item.MergeExpire();
+
                     if (item.Expires == DateTime.MinValue)
                     {
                         return item;
@@ -87,19 +91,6 @@
             {
                 return CacheItem<T>.Empty(key);
             }
-        }
-
-        /// <summary>
-        /// Gets the cache item value with the specified key.
-        /// </summary>
-        /// <typeparam name="T">The item type.</typeparam>
-        /// <param name="key">The key.</param>
-        /// <returns>The cache item.</returns>
-        public override async Task<T> GetValue<T>(string key)
-        {
-            var item = await this.Get<T>(key);
-
-            return item.HasValue ? item.Value : default(T);
         }
 
         /// <summary>
@@ -142,7 +133,7 @@
                     this.cache.TryAdd(key, new CacheItem<T>(key, item, expires.DateTime));
                 }
 
-                if (typeof(IExpires).GetTypeInfo().IsAssignableFrom(typeof(T).GetTypeInfo()))
+                if (typeof(IExpires).GetTypeInfo().IsAssignableFrom(typeof(T).GetTypeInfo()) && expires.DateTime > DateTime.Now)
                 {
                     ((IExpires)item).Expires = expires.DateTime;
                 }

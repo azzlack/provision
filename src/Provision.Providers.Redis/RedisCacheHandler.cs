@@ -9,6 +9,7 @@
 
     using MsgPack.Serialization;
 
+    using Provision.Extensions;
     using Provision.Interfaces;
     using Provision.Models;
 
@@ -217,13 +218,10 @@
                             this.log.DebugFormat("Retrieved cache item with key '{0}' and type '{1}'. It expires at {2}", key, typeof(T), expires);
                             this.log.InfoFormat("RedisCacheHandler.GetCacheItem<{2}>({1}) Time: {0}s", DateTime.Now.Subtract(start).TotalSeconds, key, typeof(T));
 
-                            // Set expiry date if applicable
-                            if (typeof(IExpires).IsAssignableFrom(typeof(T)))
-                            {
-                                ((IExpires)result).Expires = expires;
-                            }
+                            var ci = new CacheItem<T>(key, result, expires);
+                            ci.MergeExpire();
 
-                            return new CacheItem<T>(key, result, expires);
+                            return ci;
                         }
                     }
                     catch (Exception ex)
@@ -240,29 +238,6 @@
             this.log.InfoFormat("RedisCacheHandler.GetCacheItem<{2}>({1}) Time: {0}s (Error)", DateTime.Now.Subtract(start).TotalSeconds, key, typeof(T));
 
             return null;
-        }
-
-        /// <summary>
-        /// Gets the cache item value with the specified key.
-        /// </summary>
-        /// <typeparam name="T">The item type.</typeparam>
-        /// <param name="key">The key.</param>
-        /// <returns>The cache item.</returns>
-        public override async Task<T> GetValue<T>(string key)
-        {
-            var item = await this.Get<T>(key);
-
-            if (item.HasValue)
-            {
-                if (typeof(IExpires).IsAssignableFrom(typeof(T)))
-                {
-                    ((IExpires)item.Value).Expires = item.Expires;
-                }
-
-                return item.Value;
-            }
-
-            return default(T);
         }
 
         /// <summary>
