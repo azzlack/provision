@@ -65,7 +65,7 @@
     <Compile Include="Interfaces\ICacheHandlerConfiguration.cs" />
     <Compile Include="Interfaces\ICacheItem.cs" />
     <Compile Include="Interfaces\IExpires.cs" />
-    <Compile Include="Models\BaseCacheHandler.cs" />
+    <Compile Include="Providers\BaseCacheHandler.cs" />
     <Compile Include="Models\BaseCacheHandlerConfiguration.cs" />
     <Compile Include="Models\CacheItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

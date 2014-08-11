@@ -19,7 +19,7 @@
         [SetUp]
         public void SetUp()
         {
-            this.cacheHandler = ProvisionConfiguration.Configuration.GetHandler();
+            this.cacheHandler = ProvisionConfiguration.Current.GetHandler();
         }
 
         [Test]

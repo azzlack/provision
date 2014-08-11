@@ -17,7 +17,7 @@
         /// Gets the settings.
         /// </summary>
         /// <value>The settings.</value>
-        public static ProvisionConfiguration Configuration
+        public static ProvisionConfiguration Current
         {
             get
             {

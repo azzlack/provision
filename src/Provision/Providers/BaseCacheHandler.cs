@@ -1,9 +1,10 @@
-﻿namespace Provision.Models
+﻿namespace Provision.Providers
 {
     using System;
     using System.Threading.Tasks;
 
     using Provision.Interfaces;
+    using Provision.Models;
     using Provision.Quartz;
 
     public class BaseCacheHandler : ICacheHandler

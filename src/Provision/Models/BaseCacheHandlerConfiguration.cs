@@ -5,6 +5,7 @@
     using System.Reflection;
 
     using Provision.Interfaces;
+    using Provision.Providers;
 
     public class BaseCacheHandlerConfiguration : ICacheHandlerConfiguration
     {
