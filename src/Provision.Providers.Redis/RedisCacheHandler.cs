@@ -246,7 +246,17 @@
         {
             var item = await this.Get<T>(key);
 
-            return item.HasValue ? item.Value : default(T);
+            if (item.HasValue)
+            {
+                if (typeof(IExpires).IsAssignableFrom(typeof(T)))
+                {
+                    ((IExpires)item.Value).Expires = item.Expires;
+                }
+
+                return item.Value;
+            }
+
+            return default(T);
         }
 
         /// <summary>
