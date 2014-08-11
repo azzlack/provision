@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Provision.Providers.Redis",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Provision.Config", "Provision.Config\Provision.Config.csproj", "{D5550A6C-1187-427E-BFFC-A3BDDD05AD2E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Provision.Providers.PortableMemoryCache", "Provision.Providers.PortableMemoryCache\Provision.Providers.PortableMemoryCache.csproj", "{CC72CFED-B729-4474-83ED-E5293AB796C8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{D5550A6C-1187-427E-BFFC-A3BDDD05AD2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D5550A6C-1187-427E-BFFC-A3BDDD05AD2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D5550A6C-1187-427E-BFFC-A3BDDD05AD2E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CC72CFED-B729-4474-83ED-E5293AB796C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC72CFED-B729-4474-83ED-E5293AB796C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC72CFED-B729-4474-83ED-E5293AB796C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC72CFED-B729-4474-83ED-E5293AB796C8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

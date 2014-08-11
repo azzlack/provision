@@ -7,18 +7,18 @@
     using NUnit.Framework;
 
     using Provision.Interfaces;
-    using Provision.Providers.MemoryCache;
+    using Provision.Providers.PortableMemoryCache;
     using Provision.Tests.Models;
 
     [TestFixture]
-    public class MemoryCacheHandlerTests
+    public class PortableMemoryCacheHandlerTests
     {
         private ICacheHandler cacheHandler;
 
         [SetUp]
         public void SetUp()
         {
-            this.cacheHandler = new MemoryCacheHandler();
+            this.cacheHandler = new PortableMemoryCacheHandler();
         }
 
         [Test]

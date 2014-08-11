@@ -55,6 +55,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PortableMemoryCacheHandlerTests.cs" />
     <Compile Include="MemoryCacheHandlerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Models\Report.cs" />
@@ -74,6 +75,10 @@
     <ProjectReference Include="..\Provision.Providers.MemoryCache\Provision.Providers.MemoryCache.csproj">
       <Project>{F11B0F3E-6799-44E1-B679-C24A1EF9F3B2}</Project>
       <Name>Provision.Providers.MemoryCache</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Provision.Providers.PortableMemoryCache\Provision.Providers.PortableMemoryCache.csproj">
+      <Project>{cc72cfed-b729-4474-83ed-e5293ab796c8}</Project>
+      <Name>Provision.Providers.PortableMemoryCache</Name>
     </ProjectReference>
     <ProjectReference Include="..\Provision.Providers.Redis\Provision.Providers.Redis.csproj">
       <Project>{E2B4E6B6-E1A2-47E4-956A-F89EB5F034EA}</Project>

@@ -75,18 +75,7 @@
         /// <typeparam name="T">The item type.</typeparam>
         /// <param name="key">The key.</param>
         /// <returns>The cache item.</returns>
-        public virtual async Task<T> Get<T>(string key)
-        {
-            return default(T);
-        }
-
-        /// <summary>
-        /// Gets the cache item with specified key.
-        /// </summary>
-        /// <typeparam name="T">The item type.</typeparam>
-        /// <param name="key">The key.</param>
-        /// <returns>The cache item.</returns>
-        public virtual async Task<ICacheItem<T>> GetCacheItem<T>(string key)
+        public virtual async Task<ICacheItem<T>> Get<T>(string key)
         {
             return null;
         }

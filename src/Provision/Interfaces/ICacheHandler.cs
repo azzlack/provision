@@ -42,15 +42,7 @@
         /// <typeparam name="T">The item type.</typeparam>
         /// <param name="key">The key.</param>
         /// <returns>The cache item.</returns>
-        Task<T> Get<T>(string key);
-
-        /// <summary>
-        /// Gets the cache item with specified key.
-        /// </summary>
-        /// <typeparam name="T">The item type.</typeparam>
-        /// <param name="key">The key.</param>
-        /// <returns>The cache item.</returns>
-        Task<ICacheItem<T>> GetCacheItem<T>(string key);
+        Task<ICacheItem<T>> Get<T>(string key);
 
         /// <summary>
         /// Gets the cache item value with the specified key.

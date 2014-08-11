@@ -11,6 +11,16 @@
     public class CacheItem<T> : ICacheItem<T>
     {
         /// <summary>
+        /// Prevents a default instance of the <see cref="CacheItem{T}" /> class from being created.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        private CacheItem(string key = "")
+        {
+            this.Key = key;
+            this.Expires = DateTime.Now;
+        }
+ 
+        /// <summary>
         /// Initializes a new instance of the <see cref="CacheItem{T}" /> class.
         /// </summary>
         /// <param name="key">The key.</param>
@@ -51,6 +61,15 @@
             {
                 return this.Value != null;
             }
+        }
+
+        /// <summary>
+        /// Creates an empty cache item with the specified key.
+        /// </summary>
+        /// <returns>The cache item.</returns>
+        public static CacheItem<T> Empty(string key)
+        {
+            return new CacheItem<T>(key);
         }
     }
 }

@@ -1,34 +1,36 @@
-﻿namespace Provision.Providers.MemoryCache
+﻿namespace Provision.Providers.PortableMemoryCache
 {
     using System;
-    using System.Runtime.Caching;
+    using System.Collections.Generic;
+    using System.Reflection;
     using System.Threading.Tasks;
 
     using Provision.Interfaces;
     using Provision.Models;
+    using Provision.Providers.PortableMemoryCache.Mono;
 
-    public class MemoryCacheHandler : BaseCacheHandler
+    public class PortableMemoryCacheHandler : BaseCacheHandler
     {
         /// <summary>
         /// The cache
         /// </summary>
-        private MemoryCache cache;
+        private ConcurrentDictionary<string, object> cache;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MemoryCacheHandler"/> class.
+        /// Initializes a new instance of the <see cref="PortableMemoryCacheHandler"/> class.
         /// </summary>
-        public MemoryCacheHandler()
+        public PortableMemoryCacheHandler()
         {
-            this.cache = MemoryCache.Default;
+            this.cache = new ConcurrentDictionary<string, object>();
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MemoryCacheHandler"/> class.
+        /// Initializes a new instance of the <see cref="PortableMemoryCacheHandler"/> class.
         /// </summary>
         /// <param name="configuration">The configuration.</param>
-        public MemoryCacheHandler(ICacheHandlerConfiguration configuration)
+        public PortableMemoryCacheHandler(ICacheHandlerConfiguration configuration)
         {
-            this.cache = MemoryCache.Default;
+            this.cache = new ConcurrentDictionary<string, object>();
         }
 
         /// <summary>
@@ -49,7 +51,7 @@
         /// <returns><c>true</c> if a cache item exists, <c>false</c> otherwise.</returns>
         public override async Task<bool> Contains<T>(string key)
         {
-            return this.cache.Contains(key);
+            return this.cache.ContainsKey(key);
         }
 
         /// <summary>
@@ -60,24 +62,31 @@
         /// <returns>The cache item.</returns>
         public override async Task<ICacheItem<T>> Get<T>(string key)
         {
-            var item = this.cache.Get(key) as ICacheItem<T>;
-
-            if (item != null)
+            try
             {
-                if (item.Expires == DateTime.MinValue)
+                var item = this.cache[key] as ICacheItem<T>;
+
+                if (item != null)
                 {
+                    if (item.Expires == DateTime.MinValue)
+                    {
+                        return item;
+                    }
+
+                    if (item.Expires < DateTime.Now)
+                    {
+                        return CacheItem<T>.Empty(key);
+                    }
+
                     return item;
                 }
 
-                if (item.Expires < DateTime.Now)
-                {
-                    return CacheItem<T>.Empty(key);
-                }
-
-                return item;
+                return CacheItem<T>.Empty(key);
             }
-
-            return CacheItem<T>.Empty(key);
+            catch (KeyNotFoundException)
+            {
+                return CacheItem<T>.Empty(key);
+            }
         }
 
         /// <summary>
@@ -121,14 +130,19 @@
                 {
                     var cacheItem = item as CacheItem<T>;
 
-                    this.cache.Set(key, new CacheItem<T>(cacheItem.Key, cacheItem.Value, cacheItem.Expires), expires);
+                    if (await this.Contains<T>(key))
+                    {
+                        await this.Remove<T>(key);
+                    }
+
+                    this.cache.TryAdd(key, cacheItem);
                 }
                 else
                 {
-                    this.cache.Set(key, new CacheItem<T>(key, item, expires.DateTime), expires);
+                    this.cache.TryAdd(key, new CacheItem<T>(key, item, expires.DateTime));
                 }
 
-                if (typeof(IExpires).IsAssignableFrom(typeof(T)))
+                if (typeof(IExpires).GetTypeInfo().IsAssignableFrom(typeof(T).GetTypeInfo()))
                 {
                     ((IExpires)item).Expires = expires.DateTime;
                 }
@@ -147,9 +161,9 @@
         /// <returns><c>True</c> if successful, <c>false</c> otherwise.</returns>
         public override async Task<bool> Remove<T>(string key)
         {
-            this.cache.Remove(key);
+            object existingValue;
 
-            return true;
+            return this.cache.TryRemove(key, out existingValue);
         }
 
         /// <summary>
@@ -158,8 +172,7 @@
         /// <returns><c>True</c> if successful, <c>false</c> otherwise.</returns>
         public override async Task<bool> Purge()
         {
-            this.cache.Dispose();
-            this.cache = MemoryCache.Default;
+            this.cache = new ConcurrentDictionary<string, object>();
 
             return true;
         }

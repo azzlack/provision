@@ -151,34 +151,7 @@
         /// <typeparam name="T">The item type.</typeparam>
         /// <param name="key">The key.</param>
         /// <returns>The cache item.</returns>
-        public override async Task<T> Get<T>(string key)
-        {
-            var item = await this.GetCacheItem<T>(key);
-
-            if (item != null && item.HasValue)
-            {
-                var value = item.Value as IExpires;
-
-                if (value != null)
-                {
-                    value.Expires = item.Expires;
-
-                    return (T)value;
-                }
-
-                return item.Value;
-            }
-
-            return default(T);
-        }
-
-        /// <summary>
-        /// Gets the cache item with specified key.
-        /// </summary>
-        /// <typeparam name="T">The item type.</typeparam>
-        /// <param name="key">The key.</param>
-        /// <returns>The cache item.</returns>
-        public override async Task<ICacheItem<T>> GetCacheItem<T>(string key)
+        public override async Task<ICacheItem<T>> Get<T>(string key)
         {
             var start = DateTime.Now;
 
@@ -222,7 +195,7 @@
                                 expires = DateTime.Now.Add(ttl);
                             }
                         }
-                        
+
                         // Convert data to typed result
                         T result;
 
@@ -272,7 +245,7 @@
         /// <returns>The cache item.</returns>
         public override async Task<T> GetValue<T>(string key)
         {
-            var item = await this.GetCacheItem<T>(key);
+            var item = await this.Get<T>(key);
 
             return item.HasValue ? item.Value : default(T);
         }
