@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>Provision.Config</id>
-    <version>1.1.2</version>
+    <version>1.2.0</version>
     <title>Config file support for Provision</title>
     <authors>Ove Andersen</authors>
     <owners>EyeCatch</owners>
@@ -17,7 +17,7 @@
     <language>en-US</language>
     <tags>caching redis memory config provision eyecatch</tags>
     <dependencies>
-      <dependency id="Provision" version="1.1.1" />
+      <dependency id="Provision" version="1.2.0" />
     </dependencies>
   </metadata>
 </package>

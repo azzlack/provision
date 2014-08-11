@@ -4,7 +4,6 @@
     using System.Threading.Tasks;
 
     using Provision.Interfaces;
-    using Provision.Models;
     using Provision.Quartz;
 
     public class BaseCacheHandler : ICacheHandler

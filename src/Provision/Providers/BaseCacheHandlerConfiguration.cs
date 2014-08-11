@@ -1,11 +1,10 @@
-﻿namespace Provision.Models
+﻿namespace Provision.Providers
 {
     using System;
     using System.Collections.Generic;
     using System.Reflection;
 
     using Provision.Interfaces;
-    using Provision.Providers;
 
     public class BaseCacheHandlerConfiguration : ICacheHandlerConfiguration
     {
