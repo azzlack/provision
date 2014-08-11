@@ -1,5 +1,7 @@
 ﻿namespace Provision.Providers.Redis
 {
+    using System.Reflection;
+
     using Provision.Models;
 
     public class RedisCacheHandlerConfiguration : BaseCacheHandlerConfiguration
@@ -8,7 +10,13 @@
         /// Initializes a new instance of the <see cref="RedisCacheHandlerConfiguration"/> class.
         /// </summary>
         public RedisCacheHandlerConfiguration()
+            : base("redis", typeof(RedisCacheHandler).GetTypeInfo())
         {
+            this.Options["host"] = "localhost";
+            this.Options["port"] = 6379;
+            this.Options["database"] = 0;
+            this.Options["compress"] = false;
+            this.Options["maxZipMapEntries"] = 512;
         }
 
         /// <summary>
@@ -19,9 +27,11 @@
         /// <param name="database">The database.</param>
         /// <param name="password">The password.</param>
         /// <param name="prefix">The prefix.</param>
+        /// <param name="maxZipMapEntries">The maximum number of zip map entries.</param>
         /// <param name="loggerName">The logger name.</param>
         /// <param name="compress">if set to <c>true</c> [compress].</param>
-        public RedisCacheHandlerConfiguration(string host, int port, int database, string password, string prefix, string loggerName, bool compress)
+        public RedisCacheHandlerConfiguration(string host = "localhost", int port = 6379, int database = 0, string password = null, string prefix = null, int maxZipMapEntries = 512, string loggerName = null, bool compress = false)
+            : base("redis", typeof(RedisCacheHandler).GetTypeInfo())
         {
             this.Options["host"] = host;
             this.Options["port"] = port;
@@ -30,6 +40,7 @@
             this.Options["prefix"] = prefix;
             this.Options["loggerName"] = loggerName;
             this.Options["compress"] = compress;
+            this.Options["maxZipMapEntries"] = maxZipMapEntries;
         }
 
         /// <summary>
@@ -64,12 +75,7 @@
         {
             get
             {
-                if (this.Options.ContainsKey("port"))
-                {
-                    return this.GetPropertyValue<int>("port");
-                }
-
-                return 6379;
+                return this.GetPropertyValue<int>("port");
             }
         }
 
@@ -81,13 +87,7 @@
         {
             get
             {
-
-                if (this.Options.ContainsKey("database"))
-                {
-                    return this.GetPropertyValue<int>("database");
-                }
-
-                return 0;
+                return this.GetPropertyValue<int>("database");
             }
         }
 
@@ -116,6 +116,18 @@
         }
 
         /// <summary>
+        /// Gets a value indicating whether data should be compressed.
+        /// </summary>
+        /// <value><c>true</c> if data should be compressed; otherwise, <c>false</c>.</value>
+        public bool Compress
+        {
+            get
+            {
+                return this.GetPropertyValue<bool>("compress");
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the max number of zipmap entries.
         /// </summary>
         /// <value>The max number of zipmap entries.</value>
@@ -123,12 +135,7 @@
         {
             get
             {
-                if (this.Options.ContainsKey("maxZipMapEntries"))
-                {
-                    return this.GetPropertyValue<int>("maxZipMapEntries");
-                }
-
-                return 512;
+                return this.GetPropertyValue<int>("maxZipMapEntries");
             }
         }
     }

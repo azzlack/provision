@@ -27,7 +27,7 @@
         {
             var key = this.cacheHandler.CreateKey<Report>("reports", "1234567", "k4", "2014");
 
-            Assert.AreEqual("provision:reports:1234567:k4:2014", key);
+            Assert.AreEqual("provisionconfig:reports:1234567:k4:2014", key);
         }
 
         [Test]
@@ -47,7 +47,7 @@
 
             await Task.Delay(1000);
 
-            var r = await this.cacheHandler.Contains<Report>("provision:xyz:1#k4");
+            var r = await this.cacheHandler.Contains<Report>("provisionconfig:xyz:1#k4");
 
             Assert.IsTrue(r);
         }
@@ -69,7 +69,7 @@
 
             await Task.Delay(1000);
 
-            var r = await this.cacheHandler.Contains<Report>("provision:delivery:2#k4");
+            var r = await this.cacheHandler.Contains<Report>("provisionconfig:delivery:2#k4");
 
             Assert.IsTrue(r);
         }
@@ -85,7 +85,7 @@
 
             await Task.Delay(1000);
 
-            var r = await this.cacheHandler.Contains<Report>("provision:reports:delivery:k4:2014");
+            var r = await this.cacheHandler.Contains<Report>("provisionconfig:reports:delivery:k4:2014");
 
             Assert.IsTrue(r);
         }
@@ -187,13 +187,15 @@
 
             await Task.Delay(1000);
 
-            var r1 = await this.cacheHandler.Contains<Report>("provision:reports:monthlyconsumption:k4:2014");
+            var r1 = await this.cacheHandler.Contains<Report>("provisionconfig:reports:monthlyconsumption:k4:2014");
 
             Assert.IsTrue(r1);
 
             await this.cacheHandler.Purge();
 
-            var r2 = await this.cacheHandler.Contains<Report>("provision:reports:monthlyconsumption:k4:2014");
+            await Task.Delay(1000);
+
+            var r2 = await this.cacheHandler.Contains<Report>("provisionconfig:reports:monthlyconsumption:k4:2014");
 
             Assert.IsFalse(r2);
         }

@@ -28,7 +28,7 @@
         /// <summary>
         /// Gets the expire time.
         /// </summary>
-        /// <returns>DateTimeOffset.</returns>
+        /// <returns>A date/time offset. Defaults to 1 minute.</returns>
         public DateTimeOffset ExpireTime
         {
             get

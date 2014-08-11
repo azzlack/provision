@@ -31,7 +31,7 @@
             this.options = new Dictionary<string, object>()
                                {
                                    { "name", name },
-                                   { "type", cacheHandlerType.ToString() }
+                                   { "type", cacheHandlerType.AsType() }
                                };
         }
 
@@ -70,7 +70,7 @@
             {
                 var v = this.options["type"] as Type;
 
-                if (v != null && v.GetTypeInfo().IsClass && typeof(ICacheHandlerConfiguration).GetTypeInfo().IsAssignableFrom(v.GetTypeInfo()))
+                if (v != null && v.GetTypeInfo().IsClass && typeof(ICacheHandler).GetTypeInfo().IsAssignableFrom(v.GetTypeInfo()))
                 {
                     return v;
                 }
@@ -143,7 +143,7 @@
         {
             try
             {
-                return (T)this[propertyName];
+                return (T)Convert.ChangeType(this[propertyName], typeof(T));
             }
             catch
             {

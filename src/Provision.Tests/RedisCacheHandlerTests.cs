@@ -19,7 +19,7 @@
         [SetUp]
         public void SetUp()
         {
-            this.cacheHandler = new RedisCacheHandler(new RedisCacheHandlerConfiguration("localhost", 6379, 3, null, "provision", null, true));
+            this.cacheHandler = new RedisCacheHandler(new RedisCacheHandlerConfiguration("localhost", 6379, 3, null, "provision", 512, null, true));
         }
 
         [Test]
@@ -192,6 +192,8 @@
             Assert.IsTrue(r1);
 
             await this.cacheHandler.Purge();
+
+            await Task.Delay(1000);
 
             var r2 = await this.cacheHandler.Contains<Report>("provision:reports:monthlyconsumption:k4:2014");
 

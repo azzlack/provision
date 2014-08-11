@@ -13,6 +13,7 @@
     using Provision.Models;
 
     using ServiceStack.Redis;
+    using ServiceStack.Text;
 
     /// <summary>
     /// The redis cache handler.
@@ -189,7 +190,7 @@
 
                     try
                     {
-                        T result;
+                        byte[] data;
                         var expires = DateTime.MinValue;
 
                         var serializer = SerializationContext.Default.GetSerializer<T>();
@@ -199,9 +200,8 @@
                             var h = key.Split('#')[0];
                             var k = key.Split('#')[1];
 
-                            // Get value
-                            var value = ((IRedisNativeClient)client).HGet(h, Encoding.UTF8.GetBytes(k));
-                            var data = serializer.UnpackSingleObject(value);
+                            // Get data
+                            data = ((IRedisNativeClient)client).HGet(h, Encoding.UTF8.GetBytes(k));
 
                             // Get expire time
                             var ttl = client.GetTimeToLive(h);
@@ -209,14 +209,11 @@
                             {
                                 expires = DateTime.Now.Add(ttl);
                             }
-
-                            result = data;
                         }
                         else
                         {
-                            // Get value
-                            var value = ((IRedisNativeClient)client).Get(key);
-                            var data = serializer.UnpackSingleObject(value);
+                            // Get data
+                            data = ((IRedisNativeClient)client).Get(key);
 
                             // Get expire time
                             var ttl = client.GetTimeToLive(key);
@@ -224,8 +221,19 @@
                             {
                                 expires = DateTime.Now.Add(ttl);
                             }
+                        }
+                        
+                        // Convert data to typed result
+                        T result;
 
-                            result = data;
+                        // If compression is specified, decompress result
+                        if (this.configuration.Compress)
+                        {
+                            result = serializer.UnpackSingleObject(data);
+                        }
+                        else
+                        {
+                            result = JsonSerializer.DeserializeFromString<T>(Encoding.UTF8.GetString(data));
                         }
 
                         if (result == null)
@@ -299,13 +307,23 @@
                 {
                     using (var client = this.clientManager.GetClient())
                     {
-                        // Insert serialized value to database
                         try
                         {
                             var inserted = true;
 
                             var serializer = SerializationContext.Default.GetSerializer<T>();
-                            var data = serializer.PackSingleObject(item);
+
+                            byte[] data;
+                            
+                            // If compression is specified, compress data before inserting into database
+                            if (this.configuration.Compress)
+                            {
+                                data = serializer.PackSingleObject(item);
+                            }
+                            else
+                            {
+                                data = Encoding.UTF8.GetBytes(JsonSerializer.SerializeToString(item));
+                            }
 
                             if (key.Contains("#"))
                             {
@@ -461,6 +479,8 @@
                             this.configuration.Prefix,
                             this.configuration.Host,
                             this.configuration.Database);
+
+                        client.RemoveAll(client.ScanAllKeys(string.Format("{0}:*", this.configuration.Prefix)));   
                     }
                     else
                     {
@@ -468,10 +488,10 @@
                             "Purging cache in database {0}#{1}",
                             this.configuration.Host,
                             this.configuration.Database);
+                        
+                        client.FlushDb();
                     }
-
-                    client.FlushDb();
-
+                    
                     purged = true;
                 }
             }
