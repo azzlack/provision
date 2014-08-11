@@ -11,6 +11,20 @@ An easy-to-use and fast caching framework for .NET with support for many storage
 ```csharp
 var cacheHandler = new RedisCacheHandler(new RedisCacheHandlerConfiguration("localhost", 6379, 3));
 ```
+#### Configure from app.config or web.config
+```csharp
+var cacheHandler = PerceptionConfiguration.Current.GetHandler();
+```
+```xml
+<configuration>
+  <configSections>
+    <section name="provision" type="Provision.Config.ProvisionConfiguration, Provision.Config" />
+  </configSections>
+  <provision handler="Provision.Providers.Redis.RedisCacheHandler, Provision.Providers.Redis" defaultConfiguration="redis">
+		<add name="redis" type="Provision.Providers.Redis.RedisCacheHandlerConfiguration, Provision.Providers.Redis" database="3" host="10.1.14.149" prefix="glue" />
+	</provision>
+</configuration>
+```
 #### Add object to cache
 ```csharp
 var cacheHandler = new MemoryCacheHandler();
@@ -52,6 +66,7 @@ var cacheHandler = new MemoryCacheHandler();
 
 var purged = await cacheHandler.Purge();
 ```
+
 
 ##### Credits
 [Mono](http://www.mono-project.com/) for `ConcurrentDictionary`, `ReadOnlyCollection` and `SplitOrderedList` used in the `PortableMemoryCacheHandler`  
