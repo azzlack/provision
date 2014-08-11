@@ -27,6 +27,7 @@
         /// </summary>
         /// <param name="configuration">The configuration.</param>
         public MemoryCacheHandler(ICacheHandlerConfiguration configuration)
+            : base(configuration)
         {
             this.cache = MemoryCache.Default;
         }

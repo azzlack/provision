@@ -29,6 +29,7 @@
         /// </summary>
         /// <param name="configuration">The configuration.</param>
         public PortableMemoryCacheHandler(ICacheHandlerConfiguration configuration)
+            : base(configuration)
         {
             this.cache = new ConcurrentDictionary<string, object>();
         }
