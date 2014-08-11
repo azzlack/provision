@@ -1,5 +1,8 @@
 @echo off
 echo.
+echo Deleting old packages
+del Provision.*.nupkg
+echo.
 echo Updating NuGet
 nuget.exe update -self
 echo Building solution

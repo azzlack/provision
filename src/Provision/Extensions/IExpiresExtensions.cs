@@ -18,10 +18,10 @@
         /// <param name="obj">The object.</param>
         public static void MergeExpire<T>(this ICacheItem<T> obj)
         {
-            if (obj.HasValue && obj.Expires > DateTime.MinValue)
+            if (obj.HasValue && obj.Expires.ToUniversalTime() > DateTime.MinValue)
             {
                 if (typeof(IExpires).GetTypeInfo().IsAssignableFrom(typeof(T).GetTypeInfo())
-                    && ((IExpires)obj.Value).Expires == DateTime.MinValue)
+                    && ((IExpires)obj.Value).Expires.ToUniversalTime() == DateTime.MinValue)
                 {
                     ((IExpires)obj.Value).Expires = obj.Expires;   
                 }

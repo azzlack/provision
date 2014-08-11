@@ -4,6 +4,6 @@
     <section name="provision" type="Provision.Config.ProvisionConfiguration, Provision.Config" />
   </configSections>
   <provision handler="Provision.Providers.BaseCacheHandler, Provision" defaultConfiguration="noop">
-    <add name="noop" type="Provision.Models.BaseCacheHandlerConfiguration, Provision" expireTime="0 0/1 * 1/1 * ? *"/>
+    <add name="noop" type="Provision.Providers.BaseCacheHandlerConfiguration, Provision" expireTime="0 0/1 * 1/1 * ? *"/>
   </provision>
 </configuration>

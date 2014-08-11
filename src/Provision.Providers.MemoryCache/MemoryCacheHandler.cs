@@ -68,7 +68,7 @@
                 // Set expiry date if applicable
                 item.MergeExpire();
 
-                if (item.Expires == DateTime.MinValue)
+                if (item.Expires.ToUniversalTime() == DateTime.MinValue)
                 {
                     return item;
                 }

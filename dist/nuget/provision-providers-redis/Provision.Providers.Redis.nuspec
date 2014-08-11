@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>Provision.Providers.Redis</id>
-    <version>1.2.3</version>
+    <version>1.2.4</version>
     <title>Redis support for Provision</title>
     <authors>Ove Andersen</authors>
     <owners>EyeCatch</owners>
@@ -16,7 +16,7 @@
     <language>en-US</language>
     <tags>caching memory redis provision eyecatch</tags>
     <dependencies>
-      <dependency id="Provision" version="1.2.1" />
+      <dependency id="Provision" version="1.2.4" />
 	  <dependency id="ServiceStack.Redis" version="4.0.24"/>
     </dependencies>
   </metadata>
