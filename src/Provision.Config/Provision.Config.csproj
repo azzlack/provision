@@ -52,6 +52,12 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>(robocopy $(TargetDir) $(SolutionDir)..\dist\nuget\provision-config\lib\net45\ $(TargetName).dll /e)
+(robocopy $(TargetDir) $(SolutionDir)..\dist\nuget\provision-config\lib\net45\ $(TargetName).pdb /e)
+(robocopy $(ProjectDir) $(SolutionDir)..\dist\nuget\provision-config\src\ *.cs /xd obj\ /s)
+IF %25ERRORLEVEL%25 LEQ 1 exit 0</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

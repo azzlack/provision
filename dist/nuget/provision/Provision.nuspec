@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>Provision</id>
+    <version>1.0.1</version>
+    <title>Provision</title>
+    <authors>Ove Andersen</authors>
+    <owners>EyeCatch</owners>
+    <licenseUrl>http://www.eyecatch.no/licenses/apache-20/</licenseUrl>
+    <projectUrl>https://github.com/azzlack/provision</projectUrl>
+    <iconUrl>http://www.eyecatch.no/favicon.ico</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>An easy-to-use and fast caching framework for .NET with support for many storage systems:
+
+* Redis
+* System.Runtime.Caching.MemoryCache
+* Portable Memory Cache for use with Windows Store, Windows Phone 8, Xamarin apps
+
+NOTE: Provision requires a provider to work, please download one of the Provision.Providers packages.</description>
+    <summary>An easy-to-use and fast caching framework for .NET with support for many storage systems.</summary>
+    <releaseNotes />
+    <copyright>Copyright EyeCatch 2014</copyright>
+    <language>en-US</language>
+    <tags>caching redis memory portable provision eyecatch</tags>
+  </metadata>
+</package>

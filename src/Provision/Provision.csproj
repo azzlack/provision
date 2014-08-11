@@ -90,6 +90,13 @@
     <None Include="app.config" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>(robocopy $(TargetDir) $(SolutionDir)..\dist\nuget\provision\lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1\ $(TargetName).dll /e)
+(robocopy $(TargetDir) $(SolutionDir)..\dist\nuget\provision\lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1\ $(TargetName).pdb /e)
+(robocopy $(TargetDir) $(SolutionDir)..\dist\nuget\provision\lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1\ C5.dll /e)
+(robocopy $(ProjectDir) $(SolutionDir)..\dist\nuget\provision\src\ *.cs /xd obj\ /s)
+IF %25ERRORLEVEL%25 LEQ 1 exit 0</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
