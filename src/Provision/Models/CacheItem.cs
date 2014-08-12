@@ -64,6 +64,17 @@
         }
 
         /// <summary>
+        /// Initializes the specified value.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="expires">The expires.</param>
+        public void Initialize(T value, DateTime expires)
+        {
+            this.Value = value;
+            this.Expires = expires;
+        }
+
+        /// <summary>
         /// Creates an empty cache item with the specified key.
         /// </summary>
         /// <returns>The cache item.</returns>

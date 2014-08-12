@@ -1,10 +1,12 @@
 ﻿namespace Provision.Interfaces
 {
+    using System;
+
     /// <summary>
     /// Interface for typed cache items.
     /// </summary>
     /// <typeparam name="T">The data type</typeparam>
-    public interface ICacheItem<out T> : IExpires
+    public interface ICacheItem<T> : IExpires
     {
         /// <summary>
         /// Gets the value.
@@ -17,5 +19,12 @@
         /// </summary>
         /// <value><c>true</c> if this instance has value; otherwise, <c>false</c>.</value>
         bool HasValue { get; }
+
+        /// <summary>
+        /// Initializes this instance with the specified value and expiry date.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="expires">The expiry date.</param>
+        void Initialize(T value, DateTime expires);
     }
 }

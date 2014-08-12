@@ -45,6 +45,15 @@
         Task<ICacheItem<T>> Get<T>(string key);
 
         /// <summary>
+        /// Gets the cache item with the specified key and casts it to the specified cache item wrapper.
+        /// </summary>
+        /// <typeparam name="TWrapper">The cache item wrapper type.</typeparam>
+        /// <typeparam name="TValue">The value type.</typeparam>
+        /// <param name="key">The key.</param>
+        /// <returns>The cache item.</returns>
+        Task<TWrapper> GetAs<TWrapper, TValue>(string key) where TWrapper : ICacheItem<TValue>;
+
+        /// <summary>
         /// Gets the cache item value with the specified key.
         /// </summary>
         /// <typeparam name="T">The item type.</typeparam>

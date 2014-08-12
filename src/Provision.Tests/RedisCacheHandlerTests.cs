@@ -131,6 +131,31 @@
         }
 
         [Test]
+        public async void GetAs_WhenGivenValidKey_ShouldReturnWrapper()
+        {
+            var d = new Report()
+            {
+                Items = new List<ReportItem>()
+                            {
+                                new ReportItem() { Key = "1", Data = 100 }
+                            }
+            };
+
+            var key = this.cacheHandler.CreateKey<Report>("wrap", "up");
+
+            await this.cacheHandler.AddOrUpdate(key, d);
+
+            await Task.Delay(1000);
+
+            var r = await this.cacheHandler.GetAs<ReportCacheItem, Report>(key);
+
+            Assert.IsNotNull(r);
+            Assert.IsInstanceOf<ReportCacheItem>(r);
+            Assert.IsInstanceOf<ICacheItem<Report>>(r);
+            Assert.AreEqual(d.Items.First().Key, r.Value.Items.First().Key);
+        }
+
+        [Test]
         public async void Get_WhenGivenValidHashSetKey_ShouldReturnData()
         {
             var d = new Report()
@@ -141,7 +166,7 @@
                             }
             };
 
-            var key = string.Format("{0}#{1}", this.cacheHandler.CreateKey<Report>("fish", "11"), "k4");
+            var key = this.cacheHandler.CreateKey<Report>("fish", "11");
 
             await this.cacheHandler.AddOrUpdate(key, d);
 
@@ -150,7 +175,7 @@
             var r = await this.cacheHandler.Get<Report>(key);
 
             Assert.IsNotNull(r);
-            Assert.AreEqual("1", r.Value.Items.First().Key);
+            Assert.AreEqual(d.Items.First().Key, r.Value.Items.First().Key);
         }
 
         [Test]

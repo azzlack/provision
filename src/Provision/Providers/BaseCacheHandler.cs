@@ -92,6 +92,31 @@
         }
 
         /// <summary>
+        /// Gets the cache item with the specified key and casts it to the specified cache item wrapper.
+        /// </summary>
+        /// <typeparam name="TWrapper">The cache item wrapper type.</typeparam>
+        /// <typeparam name="TValue">The item type.</typeparam>
+        /// <param name="key">The key.</param>
+        /// <returns>The cache item.</returns>
+        public virtual async Task<TWrapper> GetAs<TWrapper, TValue>(string key) where TWrapper : ICacheItem<TValue>
+        {
+            var item = await this.Get<TValue>(key);
+
+            if (item != null && item.HasValue)
+            {
+                // Set expiry date if applicable
+                item.MergeExpire();
+                
+                var p = (ICacheItem<TValue>)Activator.CreateInstance<TWrapper>();
+                p.Initialize(item.Value, item.Expires);
+
+                return (TWrapper)p;
+            }
+
+            return default(TWrapper);
+        }
+
+        /// <summary>
         /// Gets the cache item value with the specified key.
         /// </summary>
         /// <typeparam name="T">The item type.</typeparam>
