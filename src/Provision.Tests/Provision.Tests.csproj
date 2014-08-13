@@ -55,6 +55,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CacheItemTests.cs" />
+    <Compile Include="Models\ExpireableReport.cs" />
     <Compile Include="Models\ReportCacheItem.cs" />
     <Compile Include="PortableMemoryCacheHandlerTests.cs" />
     <Compile Include="MemoryCacheHandlerTests.cs" />

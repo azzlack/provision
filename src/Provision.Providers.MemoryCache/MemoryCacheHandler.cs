@@ -2,6 +2,7 @@
 {
     using System;
     using System.Runtime.Caching;
+    using System.Text.RegularExpressions;
     using System.Threading.Tasks;
 
     using Provision.Extensions;
@@ -137,9 +138,41 @@
         /// <returns><c>True</c> if successful, <c>false</c> otherwise.</returns>
         public override async Task<bool> Remove(string key)
         {
-            this.cache.Remove(key);
+            try
+            {
+                this.cache.Remove(key);
 
-            return true;
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Removes all cache items matching the specified regular expression.
+        /// </summary>
+        /// <param name="regex">The regular expression.</param>
+        /// <returns><c>True</c> if successful, <c>false</c> otherwise.</returns>
+        public async override Task<bool> RemoveAll(Regex regex)
+        {
+            try
+            {
+                foreach (var item in cache)
+                {
+                    if (regex.Match(item.Key).Success)
+                    {
+                        await this.Remove(item.Key);
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
         /// <summary>

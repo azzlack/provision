@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text.RegularExpressions;
 
     using NUnit.Framework;
 
@@ -115,7 +116,7 @@
         }
 
         [Test]
-        public async void Remove_WhenGivenValidData_ShouldRemoveData()
+        public async void Remove_WhenGivenValidKey_ShouldRemoveData()
         {
             var d = new Report();
 
@@ -128,6 +129,31 @@
             var exists = await this.cacheHandler.Contains(key);
 
             Assert.IsFalse(exists);
+        }
+
+        [Test]
+        public async void Remove_WhenGivenValidRegex_ShouldRemoveData()
+        {
+            var d = new Report();
+
+            var key1 = this.cacheHandler.CreateKey<Report>("reports", "love", "ks", "2013");
+            await this.cacheHandler.AddOrUpdate(key1, d, DateTime.Now.AddMinutes(1));
+
+            var key2 = this.cacheHandler.CreateKey<Report>("reports", "love", "ks", "2014");
+            await this.cacheHandler.AddOrUpdate(key2, d, DateTime.Now.AddMinutes(1));
+
+            var key3 = this.cacheHandler.CreateKey<Report>("letter", "love", "ks", "2014");
+            await this.cacheHandler.AddOrUpdate(key3, d, DateTime.Now.AddMinutes(1));
+
+            await this.cacheHandler.RemoveAll(new Regex("reports_love_ks_*"));
+
+            var exists1 = await this.cacheHandler.Contains(key1);
+            var exists2 = await this.cacheHandler.Contains(key2);
+            var exists3 = await this.cacheHandler.Contains(key3);
+
+            Assert.IsFalse(exists1);
+            Assert.IsFalse(exists2);
+            Assert.IsTrue(exists3);
         }
 
         [Test]

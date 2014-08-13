@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text.RegularExpressions;
     using System.Threading.Tasks;
 
     using NUnit.Framework;
@@ -128,6 +129,45 @@
             var exists = await this.cacheHandler.Contains(key);
 
             Assert.IsFalse(exists);
+        }
+
+        [Test]
+        public async void Remove_WhenGivenValidRegex_ShouldThrowException()
+        {
+            Assert.Throws<NotSupportedException>(async () => await this.cacheHandler.RemoveAll(new Regex("provision:reports:love:ks:*")));
+        }
+
+        [Test]
+        public async void Remove_WhenGivenValidPattern_ShouldRemoveData()
+        {
+            var d = new Report();
+
+            var key1 = this.cacheHandler.CreateKey<Report>("reports", "love", "ks", "2013");
+            await this.cacheHandler.AddOrUpdate(key1, d, DateTime.Now.AddMinutes(1));
+
+            var key2 = this.cacheHandler.CreateKey<Report>("reports", "love", "ks", "2014");
+            await this.cacheHandler.AddOrUpdate(key2, d, DateTime.Now.AddMinutes(1));
+
+            var key3 = this.cacheHandler.CreateKey<Report>("letter", "love", "ks", "2014");
+            await this.cacheHandler.AddOrUpdate(key3, d, DateTime.Now.AddMinutes(1));
+
+            var key4 = string.Format("{0}#{1}", this.cacheHandler.CreateKey<Report>("reports", "love", "ks", "2012"), "jan");
+
+            await Task.Delay(1000);
+
+            await this.cacheHandler.RemoveAll("provision:reports:love:ks:*");
+
+            await Task.Delay(1000);
+
+            var exists1 = await this.cacheHandler.Contains(key1);
+            var exists2 = await this.cacheHandler.Contains(key2);
+            var exists3 = await this.cacheHandler.Contains(key3);
+            var exists4 = await this.cacheHandler.Contains(key4);
+
+            Assert.IsFalse(exists1);
+            Assert.IsFalse(exists2);
+            Assert.IsTrue(exists3);
+            Assert.IsFalse(exists4);
         }
 
         [Test]

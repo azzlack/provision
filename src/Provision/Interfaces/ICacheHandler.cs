@@ -1,6 +1,7 @@
 ﻿namespace Provision.Interfaces
 {
     using System;
+    using System.Text.RegularExpressions;
     using System.Threading.Tasks;
 
     /// <summary>
@@ -86,6 +87,20 @@
         /// <param name="key">The key.</param>
         /// <returns><c>True</c> if successful, <c>false</c> otherwise.</returns>
         Task<bool> Remove(string key);
+
+        /// <summary>
+        /// Removes all cache items matching the specified pattern.
+        /// </summary>
+        /// <param name="pattern">The pattern.</param>
+        /// <returns><c>True</c> if successful, <c>false</c> otherwise.</returns>
+        Task<bool> RemoveAll(string pattern);
+
+        /// <summary>
+        /// Removes all cache items matching the specified regular expression.
+        /// </summary>
+        /// <param name="regex">The regular expression.</param>
+        /// <returns><c>True</c> if successful, <c>false</c> otherwise.</returns>
+        Task<bool> RemoveAll(Regex regex);
 
         /// <summary>
         /// Purges all cache items.

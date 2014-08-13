@@ -3,6 +3,7 @@
     using System;
     using System.Linq;
     using System.Text;
+    using System.Text.RegularExpressions;
     using System.Threading.Tasks;
 
     using Common.Logging;
@@ -417,6 +418,61 @@
                 key);
 
             return removed;
+        }
+
+        /// <summary>
+        /// Removes all cache items matching the specified pattern.
+        /// </summary>
+        /// <param name="pattern">The pattern.</param>
+        /// <returns><c>True</c> if successful, <c>false</c> otherwise.</returns>
+        public override async Task<bool> RemoveAll(string pattern)
+        {
+            var start = DateTime.Now;
+
+            var removed = false;
+
+            try
+            {
+                using (var client = this.clientManager.GetClient())
+                {
+                    this.log.DebugFormat("Removing cache items matching pattern '{0}'", pattern);
+
+                    try
+                    {
+                        var keys = client.ScanAllKeys(pattern);
+                        client.RemoveAll(keys);
+
+                        removed = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        this.log.Error(ex);
+                    }
+
+                    this.log.DebugFormat("Successfully removed cache items matching pattern '{0}'", pattern);
+                }
+            }
+            catch (Exception ex)
+            {
+                this.log.Error("Error when connecting to database", ex);
+            }
+
+            this.log.InfoFormat(
+                "RedisCacheHandler.RemoveAll({1}) Time: {0}s",
+                DateTime.Now.Subtract(start).TotalSeconds,
+                pattern);
+
+            return removed;
+        }
+
+        /// <summary>
+        /// Removes all cache items matching the specified regular expression.
+        /// </summary>
+        /// <param name="regex">The regular expression.</param>
+        /// <returns><c>True</c> if successful, <c>false</c> otherwise.</returns>
+        public override async Task<bool> RemoveAll(Regex regex)
+        {
+            throw new NotSupportedException("Redis does not support regular expression matching");
         }
 
         /// <summary>

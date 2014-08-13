@@ -23,6 +23,7 @@
         /// <summary>
         /// Initializes this instance with the specified value and expiry date.
         /// </summary>
+        /// <remarks>Used by the <see cref="ICacheHandler"/> <c>GetAs</c> method.</remarks>
         /// <param name="value">The value.</param>
         /// <param name="expires">The expiry date.</param>
         void Initialize(T value, DateTime expires);

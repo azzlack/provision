@@ -1,7 +1,7 @@
 ﻿namespace Provision.Providers
 {
     using System;
-    using System.Reflection;
+    using System.Text.RegularExpressions;
     using System.Threading.Tasks;
 
     using Provision.Extensions;
@@ -168,6 +168,26 @@
         /// <param name="key">The key.</param>
         /// <returns><c>True</c> if successful, <c>false</c> otherwise.</returns>
         public virtual async Task<bool> Remove(string key)
+        {
+            return false;
+        }
+
+        /// <summary>
+        /// Removes all cache items matching the specified pattern.
+        /// </summary>
+        /// <param name="pattern">The pattern.</param>
+        /// <returns><c>True</c> if successful, <c>false</c> otherwise.</returns>
+        public virtual async Task<bool> RemoveAll(string pattern)
+        {
+            return await this.RemoveAll(new Regex(pattern));
+        }
+
+        /// <summary>
+        /// Removes all cache items matching the specified regular expression.
+        /// </summary>
+        /// <param name="regex">The regular expression.</param>
+        /// <returns><c>True</c> if successful, <c>false</c> otherwise.</returns>
+        public virtual async Task<bool> RemoveAll(Regex regex)
         {
             return false;
         }
