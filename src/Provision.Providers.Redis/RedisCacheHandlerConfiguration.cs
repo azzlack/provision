@@ -30,7 +30,8 @@
         /// <param name="maxZipMapEntries">The maximum number of zip map entries.</param>
         /// <param name="loggerName">The logger name.</param>
         /// <param name="compress">if set to <c>true</c> [compress].</param>
-        public RedisCacheHandlerConfiguration(string host = "localhost", int port = 6379, int database = 0, string password = null, string prefix = null, int maxZipMapEntries = 512, string loggerName = null, bool compress = false)
+        /// <param name="expireTime">The expire time.</param>
+        public RedisCacheHandlerConfiguration(string host = "localhost", int port = 6379, int database = 0, string password = null, string prefix = null, int maxZipMapEntries = 512, string loggerName = null, bool compress = false, string expireTime = "0 0/1 * 1/1 * ? *")
             : base("redis", typeof(RedisCacheHandler).GetTypeInfo())
         {
             this.Options["host"] = host;
@@ -41,6 +42,7 @@
             this.Options["loggerName"] = loggerName;
             this.Options["compress"] = compress;
             this.Options["maxZipMapEntries"] = maxZipMapEntries;
+            this.Options["expireTime"] = expireTime;
         }
 
         /// <summary>

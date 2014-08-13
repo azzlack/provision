@@ -23,6 +23,25 @@
         }
 
         [Test]
+        public async void Construct_WhenGivenValidConfiguration_ShouldApplyConfiguration()
+        {
+            var ch = new PortableMemoryCacheHandler(new PortableMemoryCacheHandlerConfiguration("0 0 0/1 1/1 * ? *"));
+
+            Assert.AreEqual("pclmem", ch.Configuration.Name);
+            Assert.AreEqual("0 0 0/1 1/1 * ? *", ch.Configuration.ExpireTime);
+
+            var key = ch.CreateKey("whale", "fail");
+
+            var d = new ReportItem() { Key = "grumpy" };
+
+            await ch.AddOrUpdate(key, d);
+
+            var r = await ch.GetValue<ReportItem>(key);
+
+            Assert.AreEqual(d.Key, r.Key);
+        }
+
+        [Test]
         public async void CreateKey_WhenGivenValidType_ShouldCreateValidKey()
         {
             var key = this.cacheHandler.CreateKey<Report>("reports", "something", "k4", "2014");

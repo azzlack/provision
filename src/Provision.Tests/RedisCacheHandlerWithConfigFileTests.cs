@@ -12,7 +12,7 @@
     using Provision.Tests.Models;
 
     [TestFixture]
-    public class RedisCacheHandlerWithConfigTests
+    public class RedisCacheHandlerWithConfigFileTests
     {
         private ICacheHandler cacheHandler;
 
