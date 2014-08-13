@@ -39,7 +39,7 @@
 
                 var expires = cron.GetNextValidTimeAfter(DateTime.Now) ?? new DateTimeOffset(DateTime.Now, new TimeSpan(0, 0, 1, 0));
 
-                return expires;
+                return TimeZoneInfo.ConvertTime(expires, cron.TimeZone);
             }
         }
 
