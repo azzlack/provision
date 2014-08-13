@@ -10,6 +10,8 @@ An easy-to-use and fast caching framework for .NET with support for many storage
 #### Basic initialization
 ```csharp
 var cacheHandler = new RedisCacheHandler(new RedisCacheHandlerConfiguration("localhost", 6379, 3));
+var cacheHandler = new MemoryCacheHandler(new MemoryCacheHandlerConfiguration("0 0 0/1 1/1 * ? *"));
+var cacheHandler = new PortableMemoryCacheHandler(new PortableMemoryCacheHandlerConfiguration("0 0 0/1 1/1 * ? *"));
 ```
 #### Configure from app.config or web.config
 ```csharp
