@@ -9,6 +9,7 @@
 
     using Provision.Interfaces;
     using Provision.Providers.PortableMemoryCache;
+    using Provision.Tests.Extensions;
     using Provision.Tests.Models;
 
     [TestFixture]
@@ -81,6 +82,27 @@
             var r = await this.cacheHandler.Contains("reports_blahblah_k4_2014");
 
             Assert.IsTrue(r);
+        }
+
+        [Test]
+        public async void AddOrUpdate_WhenUpdatingEntry_ShouldNotMutate()
+        {
+            var d = new ReportItem() { Key = "Test1" };
+
+            var key = this.cacheHandler.CreateKey<Report>("reports", "blahblah", "k4", "2014");
+
+            var obj1 = await this.cacheHandler.AddOrUpdate(key, d);
+
+            var obj2 = await this.cacheHandler.GetValue<ReportItem>(key);
+
+            var update = obj2.Clone();
+            update.Key = "Test2";
+
+            var obj3 = await this.cacheHandler.AddOrUpdate(key, update);
+
+            Assert.AreEqual(obj1.Key, obj2.Key, "The item added to the cache is not the same as was sent in");
+            Assert.AreEqual(update.Key, obj3.Key, "The item updated in the cache is not the same as was sent in");
+            Assert.AreNotEqual(obj2.Key, update.Key, "The item updated in the cache has mutated the earlier object");
         }
 
         [Test]
