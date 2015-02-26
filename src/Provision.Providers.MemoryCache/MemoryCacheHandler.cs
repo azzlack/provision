@@ -109,6 +109,13 @@
         {
             if (item != null)
             {
+                // Remove item before adding to prevent mutation of earlier calls to Get()
+                if (this.cache.Contains(key))
+                {
+                    this.cache.Remove(key);
+                }
+
+                // Add item to cache
                 if (item is CacheItem<T>)
                 {
                     var cacheItem = item as CacheItem<T>;
