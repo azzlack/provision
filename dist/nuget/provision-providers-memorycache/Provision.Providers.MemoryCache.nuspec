@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>Provision.Providers.MemoryCache</id>
-    <version>1.4.1</version>
+    <version>1.4.2</version>
     <title>MemoryCache support for Provision</title>
     <authors>Ove Andersen</authors>
     <owners>EyeCatch</owners>
