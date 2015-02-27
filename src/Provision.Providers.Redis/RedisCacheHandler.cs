@@ -179,9 +179,9 @@
 
                             // Get expire time
                             var ttl = client.GetTimeToLive(h);
-                            if (ttl.TotalSeconds > 0)
+                            if (ttl.HasValue && ttl < TimeSpan.MaxValue && ttl.Value.TotalSeconds > 0)
                             {
-                                expires = DateTime.Now.Add(ttl);
+                                expires = DateTime.Now.Add(ttl.Value);
                             }
                         }
                         else
@@ -191,9 +191,9 @@
 
                             // Get expire time
                             var ttl = client.GetTimeToLive(key);
-                            if (ttl.TotalSeconds > 0)
+                            if (ttl.HasValue && ttl < TimeSpan.MaxValue && ttl.Value.TotalSeconds > 0)
                             {
-                                expires = DateTime.Now.Add(ttl);
+                                expires = DateTime.Now.Add(ttl.Value);
                             }
                         }
 
@@ -300,7 +300,7 @@
                                 // Make item expire if not already set
                                 if (expires.DateTime > DateTime.Now)
                                 {
-                                    var ttl = client.GetTimeToLive(h);
+                                    var ttl = client.GetTimeToLive(h) ?? TimeSpan.FromSeconds(0);
                                     if (ttl.TotalSeconds <= 0)
                                     {
                                         client.ExpireEntryAt(h, expires.DateTime);

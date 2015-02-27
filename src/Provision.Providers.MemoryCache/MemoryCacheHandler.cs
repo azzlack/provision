@@ -21,7 +21,7 @@
         /// </summary>
         public MemoryCacheHandler()
         {
-            this.cache = MemoryCache.Default;
+            this.cache = new MemoryCache("Provision");
         }
 
         /// <summary>
@@ -31,7 +31,8 @@
         public MemoryCacheHandler(ICacheHandlerConfiguration configuration)
             : base(configuration)
         {
-            this.cache = MemoryCache.Default;
+            this.cache = new MemoryCache("Provision");
+            
         }
 
         /// <summary>
@@ -188,8 +189,9 @@
         /// <returns><c>True</c> if successful, <c>false</c> otherwise.</returns>
         public override async Task<bool> Purge()
         {
-            this.cache.Dispose();
-            this.cache = MemoryCache.Default;
+            var oldCache = this.cache;
+            this.cache = new MemoryCache("Provision");
+            oldCache.Dispose();
 
             return true;
         }

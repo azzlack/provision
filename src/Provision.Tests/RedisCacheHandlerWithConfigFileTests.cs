@@ -143,7 +143,7 @@
 
             var key = string.Format("{0}#{1}", this.cacheHandler.CreateKey<Report>("fish", "11"), "k4");
 
-            await this.cacheHandler.AddOrUpdate(key, d);
+            var p = await this.cacheHandler.AddOrUpdate(key, d);
 
             await Task.Delay(1000);
 

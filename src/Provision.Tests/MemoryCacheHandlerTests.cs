@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
+    using System.Threading.Tasks;
 
     using NUnit.Framework;
 
@@ -18,9 +19,10 @@
         private ICacheHandler cacheHandler;
 
         [SetUp]
-        public void SetUp()
+        public async void SetUp()
         {
             this.cacheHandler = new MemoryCacheHandler();
+            await this.cacheHandler.Purge();
         }
 
         [Test]
@@ -65,6 +67,8 @@
 
             await this.cacheHandler.AddOrUpdate(key, d, DateTime.Now.AddDays(1));
 
+            await Task.Delay(1000);
+
             var r = await this.cacheHandler.Contains("report_k4");
 
             Assert.IsTrue(r);
@@ -78,6 +82,8 @@
             var key = this.cacheHandler.CreateKey<Report>("reports", "blahblah", "k4", "2014");
 
             await this.cacheHandler.AddOrUpdate(key, d);
+
+            await Task.Delay(1000);
 
             var r = await this.cacheHandler.Contains("reports_blahblah_k4_2014");
 
@@ -93,12 +99,16 @@
 
             var obj1 = await this.cacheHandler.AddOrUpdate(key, d);
 
+            await Task.Delay(1000);
+
             var obj2 = await this.cacheHandler.GetValue<ReportItem>(key);
 
             var update = obj2.Clone();
             update.Key = "Test2";
 
             var obj3 = await this.cacheHandler.AddOrUpdate(key, update);
+
+            await Task.Delay(1000);
 
             Assert.AreEqual(obj1.Key, obj2.Key, "The item added to the cache is not the same as was sent in");
             Assert.AreEqual(update.Key, obj3.Key, "The item updated in the cache is not the same as was sent in");
@@ -119,6 +129,8 @@
             var key = this.cacheHandler.CreateKey<Report>("report", "k54");
 
             await this.cacheHandler.AddOrUpdate(key, d, DateTime.Now.AddDays(1));
+
+            await Task.Delay(1000);
 
             var r = await this.cacheHandler.GetValue<Report>("report_k54");
 
@@ -141,6 +153,8 @@
             var key = this.cacheHandler.CreateKey<Report>("report", "k84");
 
             await this.cacheHandler.AddOrUpdate(key, d, DateTime.Now.AddDays(-1));
+
+            await Task.Delay(1000);
 
             var r = await this.cacheHandler.Get<Report>("report_k84");
 
@@ -165,7 +179,11 @@
 
             await this.cacheHandler.AddOrUpdate(key, d);
 
+            await Task.Delay(1000);
+
             await this.cacheHandler.Remove(key);
+
+            await Task.Delay(1000);
 
             var exists = await this.cacheHandler.Contains(key);
 
@@ -186,7 +204,11 @@
             var key3 = this.cacheHandler.CreateKey<Report>("letter", "love", "ks", "2014");
             await this.cacheHandler.AddOrUpdate(key3, d, DateTime.Now.AddMinutes(1));
 
+            await Task.Delay(1000);
+
             await this.cacheHandler.RemoveAll("reports_love_ks_*");
+
+            await Task.Delay(1000);
 
             var exists1 = await this.cacheHandler.Contains(key1);
             var exists2 = await this.cacheHandler.Contains(key2);
@@ -211,7 +233,11 @@
             var key3 = this.cacheHandler.CreateKey<Report>("letter", "love", "ks", "2014");
             await this.cacheHandler.AddOrUpdate(key3, d, DateTime.Now.AddMinutes(1));
 
+            await Task.Delay(1000);
+
             await this.cacheHandler.RemoveAll(new Regex("reports_love_ks_*"));
+
+            await Task.Delay(1000);
 
             var exists1 = await this.cacheHandler.Contains(key1);
             var exists2 = await this.cacheHandler.Contains(key2);
