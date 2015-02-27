@@ -15,7 +15,7 @@ var cacheHandler = new PortableMemoryCacheHandler(new PortableMemoryCacheHandler
 ```
 #### Configure from app.config or web.config
 ```csharp
-var cacheHandler = PerceptionConfiguration.Current.GetHandler();
+var cacheHandler = ProvisionConfiguration.Current.GetHandler();
 ```
 ```xml
 <configuration>
