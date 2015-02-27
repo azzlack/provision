@@ -2,8 +2,6 @@
 {
     using System.Reflection;
 
-    using Provision.Models;
-
     public class RedisCacheHandlerConfiguration : BaseCacheHandlerConfiguration
     {
         /// <summary>
