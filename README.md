@@ -7,6 +7,9 @@ An easy-to-use and fast caching framework for .NET with support for many storage
 * Portable Memory Cache for use with Windows Store, Windows Phone 8, Xamarin apps
 
 ### Usage
+#### Default configuraiton
+The cache item expire time is by default `0 0/1 * 1/1 * ? *` which equals to one minute.
+
 #### Basic initialization
 ```csharp
 var cacheHandler = new RedisCacheHandler(new RedisCacheHandlerConfiguration("localhost", 6379, 3));
@@ -23,7 +26,8 @@ var cacheHandler = ProvisionConfiguration.Current.GetHandler();
     <section name="provision" type="Provision.Config.ProvisionConfiguration, Provision.Config" />
   </configSections>
   <provision handler="Provision.Providers.Redis.RedisCacheHandler, Provision.Providers.Redis" defaultConfiguration="redis">
-		<add name="redis" type="Provision.Providers.Redis.RedisCacheHandlerConfiguration, Provision.Providers.Redis" database="3" host="10.1.14.149" prefix="glue" />
+		<add name="redis" type="Provision.Providers.Redis.RedisCacheHandlerConfiguration, Provision.Providers.Redis" database="3" host="10.1.14.149" prefix="glue" expireTime="0 0 0/1 1/1 * ? *"/>
+		<!-- Expires all items automatically after 1 hour if nothing else is specified when adding the item to the cache -->
 	</provision>
 </configuration>
 ```
