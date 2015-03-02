@@ -6,6 +6,7 @@
 
     using Provision.Extensions;
     using Provision.Interfaces;
+    using Provision.Models;
     using Provision.Quartz;
 
     public class BaseCacheHandler : ICacheHandler
@@ -88,7 +89,7 @@
         /// <returns>The cache item.</returns>
         public virtual async Task<ICacheItem<T>> Get<T>(string key)
         {
-            return null;
+            return CacheItem<T>.Empty(key);
         }
 
         /// <summary>
