@@ -2,6 +2,7 @@
 {
     using System;
     using System.Linq;
+    using System.Security.Cryptography;
     using System.Text;
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
@@ -36,6 +37,11 @@
         /// The client manager
         /// </summary>
         private readonly IRedisClientsManager clientManager;
+
+        /// <summary>
+        /// The hash provider
+        /// </summary>
+        private readonly SHA1CryptoServiceProvider hashProvider = new SHA1CryptoServiceProvider();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisCacheHandler" /> class.
@@ -89,7 +95,14 @@
         /// <returns>A cache item key.</returns>
         public override string CreateKey(params object[] segments)
         {
-            var key = string.Format("{0}:{1}", this.configuration.Prefix, string.Join(":", segments.Select(x => x.ToString().Replace(':', '-'))));
+            // Hash segments if they are too long, replace invalid characters with valid ones
+            var seg = segments.Select(
+                    x =>
+                    x.ToString().Length <= 128
+                        ? x.ToString().Replace(':', '-')
+                        : Convert.ToBase64String(this.hashProvider.ComputeHash(Encoding.UTF8.GetBytes(x.ToString()))));
+
+            var key = string.Format("{0}:{1}", this.configuration.Prefix, string.Join(":", seg));
 
             if (string.IsNullOrEmpty(this.configuration.Prefix))
             {
@@ -197,6 +210,14 @@
                             }
                         }
 
+                        // If data is empty, return empty result
+                        if (data == null || data.Length == 0)
+                        {
+                            this.log.WarnFormat("Couldn't find cache item with key '{0}'", key);
+
+                            return CacheItem<T>.Empty(key);
+                        }
+
                         // Convert data to typed result
                         T result;
 
@@ -236,9 +257,9 @@
                 this.log.Error("Error when connecting to database", ex);
             }
 
-            this.log.InfoFormat("RedisCacheHandler.GetCacheItem<{2}>({1}) Time: {0}s (Error)", DateTime.Now.Subtract(start).TotalSeconds, key, typeof(T));
+            this.log.InfoFormat("(ERROR) RedisCacheHandler.GetCacheItem<{2}>({1}) Time: {0}s", DateTime.Now.Subtract(start).TotalSeconds, key, typeof(T));
 
-            return null;
+            return CacheItem<T>.Empty(key);
         }
 
         /// <summary>
