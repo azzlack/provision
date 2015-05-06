@@ -180,8 +180,6 @@
                         byte[] data;
                         var expires = DateTime.MinValue;
 
-                        var serializer = SerializationContext.Default.GetSerializer<T>();
-
                         if (key.Contains("#"))
                         {
                             var h = key.Split('#')[0];
@@ -224,6 +222,7 @@
                         // If compression is specified, decompress result
                         if (this.configuration.Compress)
                         {
+                            var serializer = SerializationContext.Default.GetSerializer<T>();
                             result = serializer.UnpackSingleObject(data);
                         }
                         else
@@ -296,13 +295,12 @@
                         {
                             var inserted = true;
 
-                            var serializer = SerializationContext.Default.GetSerializer<T>();
-
                             byte[] data;
                             
                             // If compression is specified, compress data before inserting into database
                             if (this.configuration.Compress)
                             {
+                                var serializer = SerializationContext.Default.GetSerializer<T>();
                                 data = serializer.PackSingleObject(item);
                             }
                             else

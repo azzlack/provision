@@ -1,4 +1,6 @@
-﻿namespace Provision.Tests
+﻿using Provision.Providers.Redis;
+
+namespace Provision.Tests
 {
     using System;
     using System.Collections.Generic;
@@ -20,6 +22,12 @@
         public void SetUp()
         {
             this.cacheHandler = ProvisionConfiguration.Current.GetHandler();
+        }
+
+        [Test]
+        public void Config_WhenCompressHaveBeenSetToFalse_ShouldReturnFalse()
+        {
+            Assert.IsFalse(((RedisCacheHandlerConfiguration)this.cacheHandler.Configuration).Compress);
         }
 
         [Test]

@@ -25,6 +25,20 @@
         }
 
         [Test]
+        public void Compress_WhenNotExplicitlySet_ShouldReturnFalse()
+        {
+            var ch = new RedisCacheHandler(new RedisCacheHandlerConfiguration());
+
+            Assert.IsFalse(((RedisCacheHandlerConfiguration)ch.Configuration).Compress);
+        }
+
+        [Test]
+        public void Compress_WhenSetToTrue_ShouldReturnTrue()
+        {
+            Assert.IsTrue(((RedisCacheHandlerConfiguration)this.cacheHandler.Configuration).Compress);
+        }
+
+        [Test]
         public async void CreateKey_WhenGivenValidType_ShouldCreateValidKey()
         {
             var key = this.cacheHandler.CreateKey<Report>("reports", "1234567", "k4", "2014");
