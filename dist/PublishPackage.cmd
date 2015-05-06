@@ -9,5 +9,5 @@ echo Publishing Packages
 nuget push Provision.1.5.0.nupkg -ApiKey %key%
 nuget push Provision.Config.1.5.0.nupkg -ApiKey %key%
 nuget push Provision.Providers.MemoryCache.1.5.0.nupkg -ApiKey %key%
-nuget push Provision.Providers.Redis.1.5.1.nupkg -ApiKey %key%
+nuget push Provision.Providers.Redis.1.5.5.nupkg -ApiKey %key%
 nuget push Provision.Providers.PortableMemoryCache.1.5.0.nupkg -ApiKey %key%
