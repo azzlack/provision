@@ -1,9 +1,13 @@
 ﻿namespace Provision.Providers.Redis
 {
+    using StackExchange.Redis;
     using System.Reflection;
 
     public class RedisCacheHandlerConfiguration : BaseCacheHandlerConfiguration
     {
+        /// <summary>The server connection.</summary>
+        private IConnectionMultiplexer connection;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisCacheHandlerConfiguration"/> class.
         /// </summary>
@@ -136,6 +140,31 @@
             get
             {
                 return this.GetPropertyValue<int>("maxZipMapEntries");
+            }
+        }
+
+        /// <summary>Gets the server connection.</summary>
+        /// <value>The server connection.</value>
+        public IConnectionMultiplexer Connection
+        {
+            get
+            {
+                if (this.connection == null)
+                {
+                    var configuration = new ConfigurationOptions()
+                    {
+                        EndPoints =
+                            {
+                                { this.Host, this.Port }
+                            },
+                        DefaultDatabase = this.Database,
+                        Password = this.Password
+                    };
+
+                    this.connection = ConnectionMultiplexer.Connect(configuration);
+                }
+
+                return this.connection;
             }
         }
     }
