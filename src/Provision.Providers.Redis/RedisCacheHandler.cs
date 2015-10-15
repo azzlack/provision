@@ -100,36 +100,43 @@
         {
             var start = DateTime.UtcNow;
 
-            var db = this.configuration.Connection.GetDatabase();
-
             var exists = false;
 
             try
             {
-                if (key.Contains("#"))
-                {
-                    var h = key.Split('#')[0];
-                    var k = key.Split('#')[1];
+                var db = this.configuration.Connection.GetDatabase();
 
-                    exists = await db.HashExistsAsync(h, k);
-                }
-                else
+                try
                 {
-                    exists = await db.KeyExistsAsync(key);
-                }
+                    if (key.Contains("#"))
+                    {
+                        var h = key.Split('#')[0];
+                        var k = key.Split('#')[1];
 
-                if (!exists)
-                {
-                    this.log.WarnFormat("Couldn't find cache item with key '{0}'", key);
+                        exists = await db.HashExistsAsync(h, k);
+                    }
+                    else
+                    {
+                        exists = await db.KeyExistsAsync(key);
+                    }
+
+                    if (!exists)
+                    {
+                        this.log.WarnFormat("Couldn't find cache item with key '{0}'", key);
+                    }
+                    else
+                    {
+                        this.log.DebugFormat("Found cache item with key '{0}'", key);
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    this.log.DebugFormat("Found cache item with key '{0}'", key);
+                    this.log.Error(string.Format("Error when getting value '{0}' from database", key), ex);
                 }
             }
             catch (Exception ex)
             {
-                this.log.Error(string.Format("Error when getting value '{0}' from database", key), ex);
+                this.log.Error("Error when connecting to database", ex);
             }
 
             this.log.InfoFormat("RedisCacheHandler.Contains({1}) Time: {0}s", DateTime.UtcNow.Subtract(start).TotalSeconds, key);
@@ -268,75 +275,82 @@
                 {
                     var db = this.configuration.Connection.GetDatabase();
 
-                    var inserted = true;
-
-                    byte[] data;
-
-                    // If compression is specified, compress data before inserting into database
-                    if (this.configuration.Compress)
+                    try
                     {
-                        var serializer = SerializationContext.Default.GetSerializer<T>();
-                        data = serializer.PackSingleObject(item);
-                    }
-                    else
-                    {
-                        data = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(item));
-                    }
+                        var inserted = true;
 
-                    if (key.Contains("#"))
-                    {
-                        var h = key.Split('#')[0];
-                        var k = key.Split('#')[1];
+                        byte[] data;
 
-                        // Add data to db
-                        inserted = await db.HashSetAsync(h, k, data);
-
-                        // Make item expire if not already set
-                        if (expires.UtcDateTime > DateTime.UtcNow)
+                        // If compression is specified, compress data before inserting into database
+                        if (this.configuration.Compress)
                         {
-                            var ttl = await db.KeyTimeToLiveAsync(h) ?? TimeSpan.FromSeconds(0);
-                            if (ttl.TotalSeconds <= 0)
+                            var serializer = SerializationContext.Default.GetSerializer<T>();
+                            data = serializer.PackSingleObject(item);
+                        }
+                        else
+                        {
+                            data = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(item));
+                        }
+
+                        if (key.Contains("#"))
+                        {
+                            var h = key.Split('#')[0];
+                            var k = key.Split('#')[1];
+
+                            // Add data to db
+                            inserted = await db.HashSetAsync(h, k, data);
+
+                            // Make item expire if not already set
+                            if (expires.UtcDateTime > DateTime.UtcNow)
                             {
-                                await db.KeyExpireAsync(h, expires.UtcDateTime);
+                                var ttl = await db.KeyTimeToLiveAsync(h) ?? TimeSpan.FromSeconds(0);
+                                if (ttl.TotalSeconds <= 0)
+                                {
+                                    await db.KeyExpireAsync(h, expires.UtcDateTime);
+                                }
                             }
                         }
-                    }
-                    else
-                    {
-                        // Add data to db
-                        inserted = await db.StringSetAsync(key, data);
-
-                        // Make item expire
-                        if (expires.UtcDateTime > DateTime.UtcNow)
+                        else
                         {
-                            await db.KeyExpireAsync(key, expires.UtcDateTime);
+                            // Add data to db
+                            inserted = await db.StringSetAsync(key, data);
+
+                            // Make item expire
+                            if (expires.UtcDateTime > DateTime.UtcNow)
+                            {
+                                await db.KeyExpireAsync(key, expires.UtcDateTime);
+                            }
                         }
+
+                        this.log.DebugFormat(
+                            inserted
+                                ? "Successfully inserted cache item with key '{0}'"
+                                : "Successfully updated cache item with key '{0}'",
+                            key);
+
+                        // Set expires time if item is expireable
+                        if (typeof(IExpires).IsAssignableFrom(typeof(T)) && expires.UtcDateTime > DateTime.UtcNow)
+                        {
+                            ((IExpires)item).Expires = expires.UtcDateTime;
+                        }
+
+                        this.log.InfoFormat(
+                            "RedisCacheHandler.AddOrUpdate<{2}>({1}, {2}, {3}) Time: {0}s",
+                            DateTime.UtcNow.Subtract(start).TotalSeconds,
+                            key,
+                            typeof(T),
+                            expires);
+
+                        return item;
                     }
-
-                    this.log.DebugFormat(
-                        inserted
-                            ? "Successfully inserted cache item with key '{0}'"
-                            : "Successfully updated cache item with key '{0}'",
-                        key);
-
-                    // Set expires time if item is expireable
-                    if (typeof(IExpires).IsAssignableFrom(typeof(T)) && expires.UtcDateTime > DateTime.UtcNow)
+                    catch (Exception ex)
                     {
-                        ((IExpires)item).Expires = expires.UtcDateTime;
+                        this.log.Error(string.Format("Error when inserting value '{0}' for key '{1}' to database", item, key), ex);
                     }
-
-                    this.log.InfoFormat(
-                        "RedisCacheHandler.AddOrUpdate<{2}>({1}, {2}, {3}) Time: {0}s",
-                        DateTime.UtcNow.Subtract(start).TotalSeconds,
-                        key,
-                        typeof(T),
-                        expires);
-
-                    return item;
                 }
                 catch (Exception ex)
                 {
-                    this.log.Error(string.Format("Error when inserting value '{0}' for key '{1}' to database", item, key), ex);
+                    this.log.Error("Error when connecting to database", ex);
                 }
             }
 
@@ -368,26 +382,33 @@
             {
                 var db = this.configuration.Connection.GetDatabase();
 
-                if (key.Contains("#"))
+                try
                 {
-                    var h = key.Split('#')[0];
-                    var k = key.Split('#')[1];
+                    if (key.Contains("#"))
+                    {
+                        var h = key.Split('#')[0];
+                        var k = key.Split('#')[1];
 
-                    removed = await db.HashDeleteAsync(h, k);
-                }
-                else
-                {
-                    removed = await db.KeyDeleteAsync(key);
-                }
+                        removed = await db.HashDeleteAsync(h, k);
+                    }
+                    else
+                    {
+                        removed = await db.KeyDeleteAsync(key);
+                    }
 
-                if (!removed)
+                    if (!removed)
+                    {
+                        throw new ArgumentException(string.Format("Error when removing key '{0}' to database", key));
+                    }
+                }
+                catch (Exception ex)
                 {
-                    throw new ArgumentException(string.Format("Error when removing key '{0}' to database", key));
+                    this.log.Error(ex);
                 }
             }
             catch (Exception ex)
             {
-                this.log.Error(ex);
+                this.log.Error("Error when connecting to database", ex);
             }
 
             this.log.DebugFormat("Successfully removed cache item with key '{0}'", key);
@@ -418,17 +439,24 @@
                 var server = this.configuration.Connection.GetServer(this.configuration.Host, this.configuration.Port);
                 var db = this.configuration.Connection.GetDatabase();
 
-                var keys = server.Keys(this.configuration.Database, pattern);
-                foreach (var key in keys)
+                try
                 {
-                    await db.KeyDeleteAsync(key);
-                }
+                    var keys = server.Keys(this.configuration.Database, pattern);
+                    foreach (var key in keys)
+                    {
+                        await db.KeyDeleteAsync(key);
+                    }
 
-                removed = true;
+                    removed = true;
+                }
+                catch (Exception ex)
+                {
+                    this.log.Error(ex);
+                }
             }
             catch (Exception ex)
             {
-                this.log.Error(ex);
+                this.log.Error("Error when connecting to database", ex);
             }
 
             this.log.DebugFormat("Successfully removed cache items matching pattern '{0}'", pattern);
@@ -463,45 +491,50 @@
 
             try
             {
-                var server = this.configuration.Connection.GetServer(
-                    this.configuration.Host,
-                    this.configuration.Port);
+                var server = this.configuration.Connection.GetServer(this.configuration.Host, this.configuration.Port);
                 var db = this.configuration.Connection.GetDatabase();
 
-                if (!string.IsNullOrEmpty(this.configuration.Prefix))
+                try
                 {
-                    this.log.DebugFormat(
-                        "Purging cache with prefix '{0}' in database {1}#{2}",
-                        this.configuration.Prefix,
-                        this.configuration.Host,
-                        this.configuration.Database);
-                    var keys = server.Keys(this.configuration.Database, $"{this.configuration.Prefix}:*");
-
-                    foreach (var key in keys)
+                    if (!string.IsNullOrEmpty(this.configuration.Prefix))
                     {
-                        await db.KeyDeleteAsync(key);
+                        this.log.DebugFormat(
+                            "Purging cache with prefix '{0}' in database {1}#{2}",
+                            this.configuration.Prefix,
+                            this.configuration.Host,
+                            this.configuration.Database);
+                        var keys = server.Keys(this.configuration.Database, $"{this.configuration.Prefix}:*");
+
+                        foreach (var key in keys)
+                        {
+                            await db.KeyDeleteAsync(key);
+                        }
                     }
+                    else
+                    {
+                        this.log.DebugFormat(
+                            "Purging cache in database {0}#{1}",
+                            this.configuration.Host,
+                            this.configuration.Database);
+
+                        await server.FlushDatabaseAsync(this.configuration.Database);
+                    }
+
+                    purged = true;
                 }
-                else
+                catch (Exception ex)
                 {
-                    this.log.DebugFormat(
-                        "Purging cache in database {0}#{1}",
-                        this.configuration.Host,
-                        this.configuration.Database);
-
-                    await server.FlushDatabaseAsync(this.configuration.Database);
+                    this.log.Error(ex);
                 }
-
-                purged = true;
             }
             catch (Exception ex)
             {
-                this.log.Error(ex);
+                this.log.Error("Error when connecting to database", ex);
             }
 
             this.log.InfoFormat(
-                "RedisCacheHandler.Purge() Time: {0}s",
-                DateTime.UtcNow.Subtract(start).TotalSeconds);
+                    "RedisCacheHandler.Purge() Time: {0}s",
+                    DateTime.UtcNow.Subtract(start).TotalSeconds);
 
             return purged;
         }
