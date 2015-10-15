@@ -1,13 +1,13 @@
 ﻿namespace Provision.Providers.MemoryCache
 {
-    using System;
-    using System.Runtime.Caching;
-    using System.Text.RegularExpressions;
-    using System.Threading.Tasks;
-
     using Provision.Extensions;
     using Provision.Interfaces;
     using Provision.Models;
+    using System;
+    using System.Linq;
+    using System.Runtime.Caching;
+    using System.Text.RegularExpressions;
+    using System.Threading.Tasks;
 
     public class MemoryCacheHandler : BaseCacheHandler
     {
@@ -32,7 +32,7 @@
             : base(configuration)
         {
             this.cache = new MemoryCache("Provision");
-            
+
         }
 
         /// <summary>
@@ -81,7 +81,7 @@
                     return item;
                 }
 
-                if (item.Expires < DateTime.Now)
+                if (item.Expires < DateTime.UtcNow)
                 {
                     return CacheItem<T>.Empty(key);
                 }
@@ -131,12 +131,12 @@
                 }
                 else
                 {
-                    this.cache.Set(key, new CacheItem<T>(key, item, expires.DateTime), expires);
+                    this.cache.Set(key, new CacheItem<T>(key, item, expires.UtcDateTime), expires);
                 }
 
-                if (typeof(IExpires).IsAssignableFrom(typeof(T)) && expires.DateTime > DateTime.Now)
+                if (typeof(IExpires).IsAssignableFrom(typeof(T)) && expires.UtcDateTime > DateTime.UtcNow)
                 {
-                    ((IExpires)item).Expires = expires.DateTime;
+                    ((IExpires)item).Expires = expires.UtcDateTime;
                 }
 
                 return item;

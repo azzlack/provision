@@ -1,13 +1,12 @@
 ﻿namespace Provision.Providers
 {
-    using System;
-    using System.Text.RegularExpressions;
-    using System.Threading.Tasks;
-
     using Provision.Extensions;
     using Provision.Interfaces;
     using Provision.Models;
     using Provision.Quartz;
+    using System;
+    using System.Text.RegularExpressions;
+    using System.Threading.Tasks;
 
     public class BaseCacheHandler : ICacheHandler
     {
@@ -38,7 +37,7 @@
             {
                 var cron = new CronExpression(this.Configuration.ExpireTime);
 
-                var expires = cron.GetNextValidTimeAfter(DateTime.Now) ?? new DateTimeOffset(DateTime.Now, new TimeSpan(0, 0, 1, 0));
+                var expires = cron.GetNextValidTimeAfter(DateTime.UtcNow) ?? new DateTimeOffset(DateTime.UtcNow, new TimeSpan(0, 0, 1, 0));
 
                 return TimeZoneInfo.ConvertTime(expires, cron.TimeZone);
             }
@@ -107,7 +106,7 @@
             {
                 // Set expiry date if applicable
                 item.MergeExpire();
-                
+
                 var p = (ICacheItem<TValue>)Activator.CreateInstance<TWrapper>();
                 p.Initialize(item.Value, item.Expires);
 

@@ -24,13 +24,12 @@
 
 namespace Provision.Quartz
 {
+    using Provision.Quartz.Collection;
     using System;
     using System.Collections.Generic;
     using System.Globalization;
     using System.Text;
     using System.Text.RegularExpressions;
-
-    using Provision.Quartz.Collection;
 
     /// <summary>
     /// Provides a parser and evaluator for unix-like cron expressions. Cron 
@@ -349,7 +348,7 @@ namespace Provision.Quartz
         /// </summary>
         protected bool expressionParsed;
 
-        public static readonly int MaxYear = DateTime.Now.Year + 100;
+        public static readonly int MaxYear = DateTime.UtcNow.Year + 100;
 
         static CronExpression()
         {

@@ -1,8 +1,7 @@
 ﻿namespace Provision.Models
 {
-    using System;
-
     using Provision.Interfaces;
+    using System;
 
     /// <summary>
     /// A typed cache item.
@@ -17,9 +16,9 @@
         private CacheItem(string key = "")
         {
             this.Key = key;
-            this.Expires = DateTime.Now;
+            this.Expires = DateTime.UtcNow;
         }
- 
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CacheItem{T}" /> class.
         /// </summary>

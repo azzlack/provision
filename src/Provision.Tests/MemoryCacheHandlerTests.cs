@@ -1,17 +1,15 @@
 ﻿namespace Provision.Tests
 {
+    using NUnit.Framework;
+    using Provision.Interfaces;
+    using Provision.Providers.MemoryCache;
+    using Provision.Tests.Extensions;
+    using Provision.Tests.Models;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
-
-    using NUnit.Framework;
-
-    using Provision.Interfaces;
-    using Provision.Providers.MemoryCache;
-    using Provision.Tests.Extensions;
-    using Provision.Tests.Models;
 
     [TestFixture]
     public class MemoryCacheHandlerTests
@@ -32,7 +30,7 @@
 
             Assert.AreEqual("mem", ch.Configuration.Name);
             Assert.AreEqual("0 0 0/1 1/1 * ? *", ch.Configuration.ExpireTime);
-            
+
             var key = ch.CreateKey("whale", "fail");
 
             var d = new ReportItem() { Key = "grumpy" };
@@ -65,7 +63,7 @@
 
             var key = this.cacheHandler.CreateKey<Report>("report", "k4");
 
-            await this.cacheHandler.AddOrUpdate(key, d, DateTime.Now.AddDays(1));
+            await this.cacheHandler.AddOrUpdate(key, d, DateTime.UtcNow.AddDays(1));
 
             await Task.Delay(1000);
 
@@ -128,7 +126,7 @@
 
             var key = this.cacheHandler.CreateKey<Report>("report", "k54");
 
-            await this.cacheHandler.AddOrUpdate(key, d, DateTime.Now.AddDays(1));
+            await this.cacheHandler.AddOrUpdate(key, d, DateTime.UtcNow.AddDays(1));
 
             await Task.Delay(1000);
 
@@ -152,7 +150,7 @@
 
             var key = this.cacheHandler.CreateKey<Report>("report", "k84");
 
-            await this.cacheHandler.AddOrUpdate(key, d, DateTime.Now.AddDays(-1));
+            await this.cacheHandler.AddOrUpdate(key, d, DateTime.UtcNow.AddDays(-1));
 
             await Task.Delay(1000);
 
@@ -196,13 +194,13 @@
             var d = new Report();
 
             var key1 = this.cacheHandler.CreateKey<Report>("reports", "love", "ks", "2013");
-            await this.cacheHandler.AddOrUpdate(key1, d, DateTime.Now.AddMinutes(1));
+            await this.cacheHandler.AddOrUpdate(key1, d, DateTime.UtcNow.AddMinutes(1));
 
             var key2 = this.cacheHandler.CreateKey<Report>("reports", "love", "ks", "2014");
-            await this.cacheHandler.AddOrUpdate(key2, d, DateTime.Now.AddMinutes(1));
+            await this.cacheHandler.AddOrUpdate(key2, d, DateTime.UtcNow.AddMinutes(1));
 
             var key3 = this.cacheHandler.CreateKey<Report>("letter", "love", "ks", "2014");
-            await this.cacheHandler.AddOrUpdate(key3, d, DateTime.Now.AddMinutes(1));
+            await this.cacheHandler.AddOrUpdate(key3, d, DateTime.UtcNow.AddMinutes(1));
 
             await Task.Delay(1000);
 
@@ -225,13 +223,13 @@
             var d = new Report();
 
             var key1 = this.cacheHandler.CreateKey<Report>("reports", "love", "ks", "2013");
-            await this.cacheHandler.AddOrUpdate(key1, d, DateTime.Now.AddMinutes(1));
+            await this.cacheHandler.AddOrUpdate(key1, d, DateTime.UtcNow.AddMinutes(1));
 
             var key2 = this.cacheHandler.CreateKey<Report>("reports", "love", "ks", "2014");
-            await this.cacheHandler.AddOrUpdate(key2, d, DateTime.Now.AddMinutes(1));
+            await this.cacheHandler.AddOrUpdate(key2, d, DateTime.UtcNow.AddMinutes(1));
 
             var key3 = this.cacheHandler.CreateKey<Report>("letter", "love", "ks", "2014");
-            await this.cacheHandler.AddOrUpdate(key3, d, DateTime.Now.AddMinutes(1));
+            await this.cacheHandler.AddOrUpdate(key3, d, DateTime.UtcNow.AddMinutes(1));
 
             await Task.Delay(1000);
 

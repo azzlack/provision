@@ -1,15 +1,15 @@
 ﻿namespace Provision.Providers.PortableMemoryCache
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Reflection;
-    using System.Text.RegularExpressions;
-    using System.Threading.Tasks;
-
     using Provision.Extensions;
     using Provision.Interfaces;
     using Provision.Models;
     using Provision.Providers.PortableMemoryCache.Mono;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Reflection;
+    using System.Text.RegularExpressions;
+    using System.Threading.Tasks;
 
     public class PortableMemoryCacheHandler : BaseCacheHandler
     {
@@ -84,7 +84,7 @@
                         return item;
                     }
 
-                    if (item.Expires < DateTime.Now)
+                    if (item.Expires < DateTime.UtcNow)
                     {
                         return CacheItem<T>.Empty(key);
                     }
@@ -137,12 +137,12 @@
                 }
                 else
                 {
-                    this.cache.TryAdd(key, new CacheItem<T>(key, item, expires.DateTime));
+                    this.cache.TryAdd(key, new CacheItem<T>(key, item, expires.UtcDateTime));
                 }
 
-                if (typeof(IExpires).GetTypeInfo().IsAssignableFrom(typeof(T).GetTypeInfo()) && expires.DateTime > DateTime.Now)
+                if (typeof(IExpires).GetTypeInfo().IsAssignableFrom(typeof(T).GetTypeInfo()) && expires.UtcDateTime > DateTime.UtcNow)
                 {
-                    ((IExpires)item).Expires = expires.DateTime;
+                    ((IExpires)item).Expires = expires.UtcDateTime;
                 }
 
                 return item;

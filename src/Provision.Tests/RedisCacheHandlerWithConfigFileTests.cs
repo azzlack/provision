@@ -2,16 +2,14 @@
 
 namespace Provision.Tests
 {
+    using NUnit.Framework;
+    using Provision.Config;
+    using Provision.Interfaces;
+    using Provision.Tests.Models;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-
-    using NUnit.Framework;
-
-    using Provision.Config;
-    using Provision.Interfaces;
-    using Provision.Tests.Models;
 
     [TestFixture]
     public class RedisCacheHandlerWithConfigFileTests
@@ -51,7 +49,7 @@ namespace Provision.Tests
 
             var key = string.Format("{0}#{1}", this.cacheHandler.CreateKey<Report>("xyz", "1"), "k4");
 
-            await this.cacheHandler.AddOrUpdate(key, d, DateTime.Now.AddDays(1));
+            await this.cacheHandler.AddOrUpdate(key, d, DateTime.UtcNow.AddDays(1));
 
             await Task.Delay(1000);
 

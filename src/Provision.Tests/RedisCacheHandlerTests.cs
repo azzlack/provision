@@ -1,17 +1,15 @@
 ﻿namespace Provision.Tests
 {
+    using NUnit.Framework;
+    using Provision.Interfaces;
+    using Provision.Providers.Redis;
+    using Provision.Tests.Extensions;
+    using Provision.Tests.Models;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
-
-    using NUnit.Framework;
-
-    using Provision.Interfaces;
-    using Provision.Providers.Redis;
-    using Provision.Tests.Extensions;
-    using Provision.Tests.Models;
 
     [TestFixture]
     public class RedisCacheHandlerTests
@@ -59,13 +57,14 @@
 
             var key = string.Format("{0}#{1}", this.cacheHandler.CreateKey<Report>("xyz", "1"), "k4");
 
-            await this.cacheHandler.AddOrUpdate(key, d, DateTime.Now.AddDays(1));
+            await this.cacheHandler.AddOrUpdate(key, d, DateTime.UtcNow.AddDays(1));
 
             await Task.Delay(1000);
 
-            var r = await this.cacheHandler.Contains("provision:xyz:1#k4");
+            var r = await this.cacheHandler.Get<Report>("provision:xyz:1#k4");
 
-            Assert.IsTrue(r);
+            Assert.IsNotNull(r);
+            Assert.That(r.Expires > DateTime.MinValue);
         }
 
         [Test]
@@ -85,9 +84,10 @@
 
             await Task.Delay(1000);
 
-            var r = await this.cacheHandler.Contains("provision:delivery:2#k4");
+            var r = await this.cacheHandler.Get<Report>("provision:delivery:2#k4");
 
-            Assert.IsTrue(r);
+            Assert.IsNotNull(r);
+            Assert.That(r.Expires > DateTime.MinValue);
         }
 
         [Test]
@@ -179,13 +179,13 @@
             var d = new Report();
 
             var key1 = this.cacheHandler.CreateKey<Report>("reports", "love", "ks", "2013");
-            await this.cacheHandler.AddOrUpdate(key1, d, DateTime.Now.AddMinutes(1));
+            await this.cacheHandler.AddOrUpdate(key1, d, DateTime.UtcNow.AddMinutes(1));
 
             var key2 = this.cacheHandler.CreateKey<Report>("reports", "love", "ks", "2014");
-            await this.cacheHandler.AddOrUpdate(key2, d, DateTime.Now.AddMinutes(1));
+            await this.cacheHandler.AddOrUpdate(key2, d, DateTime.UtcNow.AddMinutes(1));
 
             var key3 = this.cacheHandler.CreateKey<Report>("letter", "love", "ks", "2014");
-            await this.cacheHandler.AddOrUpdate(key3, d, DateTime.Now.AddMinutes(1));
+            await this.cacheHandler.AddOrUpdate(key3, d, DateTime.UtcNow.AddMinutes(1));
 
             var key4 = string.Format("{0}#{1}", this.cacheHandler.CreateKey<Report>("reports", "love", "ks", "2012"), "jan");
 

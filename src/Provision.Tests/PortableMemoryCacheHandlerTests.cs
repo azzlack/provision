@@ -1,16 +1,14 @@
 ﻿namespace Provision.Tests
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text.RegularExpressions;
-
     using NUnit.Framework;
-
     using Provision.Interfaces;
     using Provision.Providers.PortableMemoryCache;
     using Provision.Tests.Extensions;
     using Provision.Tests.Models;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text.RegularExpressions;
 
     [TestFixture]
     public class PortableMemoryCacheHandlerTests
@@ -63,7 +61,7 @@
 
             var key = this.cacheHandler.CreateKey<Report>("report", "k4");
 
-            await this.cacheHandler.AddOrUpdate(key, d, DateTime.Now.AddDays(1));
+            await this.cacheHandler.AddOrUpdate(key, d, DateTime.UtcNow.AddDays(1));
 
             var r = await this.cacheHandler.Contains("report_k4");
 
@@ -118,7 +116,7 @@
 
             var key = this.cacheHandler.CreateKey<Report>("report", "k54");
 
-            await this.cacheHandler.AddOrUpdate(key, d, DateTime.Now.AddDays(1));
+            await this.cacheHandler.AddOrUpdate(key, d, DateTime.UtcNow.AddDays(1));
 
             var r = await this.cacheHandler.GetValue<Report>("report_k54");
 
@@ -140,7 +138,7 @@
 
             var key = this.cacheHandler.CreateKey<Report>("report", "k84");
 
-            await this.cacheHandler.AddOrUpdate(key, d, DateTime.Now.AddDays(-1));
+            await this.cacheHandler.AddOrUpdate(key, d, DateTime.UtcNow.AddDays(-1));
 
             var r = await this.cacheHandler.Get<Report>("report_k84");
 
@@ -178,13 +176,13 @@
             var d = new Report();
 
             var key1 = this.cacheHandler.CreateKey<Report>("reports", "love", "ks", "2013");
-            await this.cacheHandler.AddOrUpdate(key1, d, DateTime.Now.AddMinutes(1));
+            await this.cacheHandler.AddOrUpdate(key1, d, DateTime.UtcNow.AddMinutes(1));
 
             var key2 = this.cacheHandler.CreateKey<Report>("reports", "love", "ks", "2014");
-            await this.cacheHandler.AddOrUpdate(key2, d, DateTime.Now.AddMinutes(1));
+            await this.cacheHandler.AddOrUpdate(key2, d, DateTime.UtcNow.AddMinutes(1));
 
             var key3 = this.cacheHandler.CreateKey<Report>("letter", "love", "ks", "2014");
-            await this.cacheHandler.AddOrUpdate(key3, d, DateTime.Now.AddMinutes(1));
+            await this.cacheHandler.AddOrUpdate(key3, d, DateTime.UtcNow.AddMinutes(1));
 
             await this.cacheHandler.RemoveAll("reports_love_ks_*");
 
@@ -203,13 +201,13 @@
             var d = new Report();
 
             var key1 = this.cacheHandler.CreateKey<Report>("reports", "love", "ks", "2013");
-            await this.cacheHandler.AddOrUpdate(key1, d, DateTime.Now.AddMinutes(1));
+            await this.cacheHandler.AddOrUpdate(key1, d, DateTime.UtcNow.AddMinutes(1));
 
             var key2 = this.cacheHandler.CreateKey<Report>("reports", "love", "ks", "2014");
-            await this.cacheHandler.AddOrUpdate(key2, d, DateTime.Now.AddMinutes(1));
+            await this.cacheHandler.AddOrUpdate(key2, d, DateTime.UtcNow.AddMinutes(1));
 
             var key3 = this.cacheHandler.CreateKey<Report>("letter", "love", "ks", "2014");
-            await this.cacheHandler.AddOrUpdate(key3, d, DateTime.Now.AddMinutes(1));
+            await this.cacheHandler.AddOrUpdate(key3, d, DateTime.UtcNow.AddMinutes(1));
 
             await this.cacheHandler.RemoveAll(new Regex("reports_love_ks_*"));
 
