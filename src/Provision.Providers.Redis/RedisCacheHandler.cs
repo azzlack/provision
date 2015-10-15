@@ -68,6 +68,12 @@
         /// <returns>A cache item key.</returns>
         public override string CreateKey(params object[] segments)
         {
+            // Throw exception if any segment is null
+            if (segments.Any(x => x == null))
+            {
+                throw new ArgumentException("Cannot create key from null segments", nameof(segments));
+            }
+
             // Hash segments if they are too long, replace invalid characters with valid ones
             var seg = segments.Select(
                     x =>
