@@ -1,10 +1,19 @@
-provision
+Provision
 =========
+[![TeamCity Build Status](https://img.shields.io/teamcity/https/teamcity.knowit.no/e/External_Provision_Build_Release.svg?style=flat-square)](https://teamcity.knowit.no/viewType.html?buildTypeId=External_Provision_Build_Release&tab=buildTypeStatusDiv&branch_External_Provision_Build=__all_branches__)  
 
 An easy-to-use and fast caching framework for .NET with support for many storage systems:
 * [Redis](http://redis.io/)
 * [System.Runtime.Caching.MemoryCache](http://msdn.microsoft.com/en-us/library/system.runtime.caching.memorycache(v=vs.110).aspx)
 * Portable Memory Cache for use with Windows Store, Windows Phone 8, Xamarin apps
+
+| Package | Description | Downloads | Version |
+| --- | --- | --- | --- |
+| `Provision` | <sub><sup>The cache handler core</sup></sub> | [![NuGet Downloads](https://img.shields.io/nuget/dt/Provision.svg?style=flat-square)](https://www.nuget.org/packages/Provision) | [![NuGet Version](https://img.shields.io/nuget/v/Provision.svg?style=flat-square)](https://www.nuget.org/packages/Provision) |
+| `Provision.Config` | <sub><sup>Config file support</sup></sub> | [![NuGet Downloads](https://img.shields.io/nuget/dt/Provision.Config.svg?style=flat-square)](https://www.nuget.org/packages/Provision.Config) | [![NuGet Version](https://img.shields.io/nuget/v/Provision.Config.svg?style=flat-square)](https://www.nuget.org/packages/Provision.Config) |
+| `Provision.Providers.Redis` | <sub><sup>A cache handler using [Redis](http://redis.io/) for storage</sup></sub> | [![NuGet Downloads](https://img.shields.io/nuget/dt/Provision.Providers.Redis.svg?style=flat-square)](https://www.nuget.org/packages/Provision.Providers.Redis) | [![NuGet Version](https://img.shields.io/nuget/v/Provision.Providers.Redis.svg?style=flat-square)](https://www.nuget.org/packages/Provision.Providers.Redis) |
+| `Provision.Providers.MemoryCache` | <sub><sup>A cache handlerr using `System.Runtime.Cache` for storage</sup></sub> | [![NuGet Downloads](https://img.shields.io/nuget/dt/Provision.Providers.MemoryCache.svg?style=flat-square)](https://www.nuget.org/packages/Provision.Providers.MemoryCache) | [![NuGet Version](https://img.shields.io/nuget/v/Provision.Providers.MemoryCache.svg?style=flat-square)](https://www.nuget.org/packages/Provision.Providers.MemoryCache) |
+| `Provision.Providers.PortableMemoryCache` | <sub><sup>A cache handler using a cross-platform memory table for storage</sup></sub> | [![NuGet Downloads](https://img.shields.io/nuget/dt/Provision.Providers.PortableMemoryCache.svg?style=flat-square)](https://www.nuget.org/packages/Provision.Providers.PortableMemoryCache) | [![NuGet Version](https://img.shields.io/nuget/v/Provision.Providers.PortableMemoryCache.svg?style=flat-square)](https://www.nuget.org/packages/Provision.Providers.PortableMemoryCache) |
 
 ### Usage
 #### Default configuration
@@ -78,7 +87,7 @@ var purged = await cacheHandler.Purge();
 When using the `RedisCacheHandler` it is important to note that the `RedisCacheHandlerConfiguration` object that you pass into the constructor should be reused across your application.  
 Most IoC containers have options for setting an instance of an interface to a singleton, use this if possible.
 
-##### Credits
+### Credits
 [Mono](http://www.mono-project.com/) for `ConcurrentDictionary`, `ReadOnlyCollection` and `SplitOrderedList` used in the `PortableMemoryCacheHandler`  
 [Quartz.NET](http://www.quartz-scheduler.net/) for the Cron expression parser used for config parsing.  
 [C5](http://www.itu.dk/research/c5/) for the `TreeSet` collection used by `Quartz.NET`.
