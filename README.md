@@ -7,7 +7,7 @@ An easy-to-use and fast caching framework for .NET with support for many storage
 * Portable Memory Cache for use with Windows Store, Windows Phone 8, Xamarin apps
 
 ### Usage
-#### Default configuraiton
+#### Default configuration
 The cache item expire time is by default `0 0/1 * 1/1 * ? *` which equals to one minute.
 
 #### Basic initialization
@@ -50,7 +50,7 @@ var cacheItem = await cacheHandler.Get<Report>(key); // Gets the cache item wrap
 var report = cacheItem.Value;
 
 // You can also use the following shorthand to get the value:
-var report2 = await cacheHandler.GetValue<Report>(key); 
+var report2 = await cacheHandler.GetValue<Report>(key);
 ````
 #### Remove object from cache
 ```csharp
@@ -73,6 +73,10 @@ var cacheHandler = new MemoryCacheHandler();
 var purged = await cacheHandler.Purge();
 ```
 
+### Important Notes
+#### Object Lifetime when using Redis
+When using the `RedisCacheHandler` it is important to note that the `RedisCacheHandlerConfiguration` object that you pass into the constructor should be reused across your application.  
+Most IoC containers have options for setting an instance of an interface to a singleton, use this if possible.
 
 ##### Credits
 [Mono](http://www.mono-project.com/) for `ConcurrentDictionary`, `ReadOnlyCollection` and `SplitOrderedList` used in the `PortableMemoryCacheHandler`  
