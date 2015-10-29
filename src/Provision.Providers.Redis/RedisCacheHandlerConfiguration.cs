@@ -158,7 +158,9 @@
                                 { this.Host, this.Port }
                             },
                         DefaultDatabase = this.Database,
-                        Password = this.Password
+                        Password = this.Password,
+                        AbortOnConnectFail = false,
+                        AllowAdmin = true
                     };
 
                     this.connection = ConnectionMultiplexer.Connect(configuration);
