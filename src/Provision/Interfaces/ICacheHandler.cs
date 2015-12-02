@@ -78,8 +78,9 @@
         /// <param name="key">The key.</param>
         /// <param name="item">The item.</param>
         /// <param name="expires">The expire time.</param>
+        /// <param name="tags">The tags</param>
         /// <returns>The added or updated value.</returns>
-        Task<T> AddOrUpdate<T>(string key, T item, DateTimeOffset expires);
+        Task<T> AddOrUpdate<T>(string key, T item, DateTimeOffset expires, params string[] tags);
 
         /// <summary>
         /// Removes the cache item with the specified key.
@@ -94,6 +95,13 @@
         /// <param name="pattern">The pattern.</param>
         /// <returns><c>True</c> if successful, <c>false</c> otherwise.</returns>
         Task<bool> RemoveAll(string pattern);
+
+        /// <summary>
+        /// Removes all cache items matching the specified tags.
+        /// </summary>
+        /// <param name="tags">The tags.</param>
+        /// <returns><c>True</c> if successful, <c>false</c> otherwise.</returns>
+        Task<bool> RemoveTags(params string[] tags);
 
         /// <summary>
         /// Removes all cache items matching the specified regular expression.

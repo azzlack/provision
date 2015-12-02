@@ -8,6 +8,8 @@
     using Provision.Models;
     using StackExchange.Redis;
     using System;
+    using System.Collections.Concurrent;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Security.Cryptography;
     using System.Text;
@@ -58,6 +60,17 @@
         {
             this.configuration = configuration;
             this.log = log;
+        }
+
+        private async Task AddOrUpdateCacheTags(string cacheKey, params string[] tags)
+        {
+            var db = this.configuration.Connection.GetDatabase();
+
+            foreach (var tag in tags)
+            {
+
+                await db.HashSetAsync(string.Format("{0}:{1}:{2}", this.configuration.Prefix, "_tags", tag), cacheKey, cacheKey);
+            }
         }
 
         /// <summary>
@@ -265,7 +278,7 @@
         /// <param name="item">The item.</param>
         /// <param name="expires">The expire time.</param>
         /// <returns>A task.</returns>
-        public override async Task<T> AddOrUpdate<T>(string key, T item, DateTimeOffset expires)
+        public override async Task<T> AddOrUpdate<T>(string key, T item, DateTimeOffset expires, params string[] tags)
         {
             var start = DateTime.UtcNow;
 
@@ -321,6 +334,8 @@
                                 await db.KeyExpireAsync(key, expires.UtcDateTime);
                             }
                         }
+
+                        await this.AddOrUpdateCacheTags(key, tags);
 
                         this.log.DebugFormat(
                             inserted
@@ -477,6 +492,53 @@
         public override async Task<bool> RemoveAll(Regex regex)
         {
             throw new NotSupportedException("Redis does not support regular expression matching");
+        }
+
+        public override async Task<bool> RemoveTags(params string[] tags)
+        {
+            var start = DateTime.UtcNow;
+
+            try
+            {
+                var database = this.configuration.Connection.GetDatabase();
+
+                try
+                {
+                    foreach (var tag in tags)
+                    {
+                        var tagsCacheKey = string.Format("{0}:{1}:{2}", this.configuration.Prefix, "_tags", tag);
+
+                        var keys = await database.HashGetAllAsync(tagsCacheKey);
+
+                        foreach (var key in keys)
+                        {
+                            await database.KeyDeleteAsync(key.Name.ToString());
+                        }
+
+                        await database.KeyDeleteAsync(tagsCacheKey);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    this.log.Error(ex);
+                    return false;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                this.log.Error("Error when connecting to database", ex);
+                return false;
+            }
+
+            this.log.DebugFormat("Successfully removed cache items matching tags '{0}'", string.Join(",", tags));
+
+            this.log.InfoFormat(
+                "RedisCacheHandler.RemoveTags({1}) Time: {0}s",
+                DateTime.UtcNow.Subtract(start).TotalSeconds,
+                string.Join(",", tags));
+
+            return true;
         }
 
         /// <summary>

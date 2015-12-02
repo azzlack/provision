@@ -18,11 +18,14 @@
         /// </summary>
         private ConcurrentDictionary<string, object> cache;
 
+        private readonly ConcurrentDictionary<string, HashSet<string>> cacheTags;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="PortableMemoryCacheHandler"/> class.
         /// </summary>
         public PortableMemoryCacheHandler()
         {
+            this.cacheTags = new ConcurrentDictionary<string, HashSet<string>>();
             this.cache = new ConcurrentDictionary<string, object>();
         }
 
@@ -33,6 +36,7 @@
         public PortableMemoryCacheHandler(ICacheHandlerConfiguration configuration)
             : base(configuration)
         {
+            this.cacheTags = new ConcurrentDictionary<string, HashSet<string>>();
             this.cache = new ConcurrentDictionary<string, object>();
         }
 
@@ -119,8 +123,9 @@
         /// <param name="key">The key.</param>
         /// <param name="item">The item.</param>
         /// <param name="expires">The expire time.</param>
+        /// <param name="tags">The tags.</param>
         /// <returns>A task.</returns>
-        public override async Task<T> AddOrUpdate<T>(string key, T item, DateTimeOffset expires)
+        public override async Task<T> AddOrUpdate<T>(string key, T item, DateTimeOffset expires, params string[] tags)
         {
             if (item != null)
             {
@@ -138,6 +143,16 @@
                 else
                 {
                     this.cache.TryAdd(key, new CacheItem<T>(key, item, expires.UtcDateTime));
+                }
+                // Attach keys to tags
+                foreach (var tag in tags)
+                {
+                    this.cacheTags.AddOrUpdate(tag, new HashSet<string> { key },
+                        (k, existingVal) =>
+                        {
+                            existingVal.Add(key);
+                            return existingVal;
+                        });
                 }
 
                 if (typeof(IExpires).GetTypeInfo().IsAssignableFrom(typeof(T).GetTypeInfo()) && expires.UtcDateTime > DateTime.UtcNow)
@@ -177,6 +192,34 @@
                     if (regex.Match(item.Key).Success)
                     {
                         await this.Remove(item.Key);
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+        /// <summary>
+        /// Removes all cache items matching the specified tags.
+        /// </summary>
+        /// <param name="tags">The tags.</param>
+        /// <returns><c>True</c> if successful, <c>false</c> otherwise.</returns>
+        public async override Task<bool> RemoveTags(params string[] tags)
+        {
+            try
+            {
+                foreach (var tag in tags)
+                {
+                    foreach (var key in this.cacheTags[tag])
+                    {
+                        var itemRemoved = await this.Remove(key);
+                        if (itemRemoved)
+                        {
+                            this.cacheTags[tag].Remove(key);
+                        }
                     }
                 }
 

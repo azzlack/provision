@@ -66,6 +66,90 @@
             Assert.IsNotNull(r);
             Assert.That(r.Expires > DateTime.MinValue);
         }
+        [Test]
+        public async void AddOrUpdateWithTags_WhenGivenValidExpireDate_ShouldInsertData()
+        {
+            var d = new Report()
+            {
+                Items = new List<ReportItem>()
+                            {
+                                new ReportItem() { Key = "1", Data = 100 }
+                            }
+            };
+
+            var key = this.cacheHandler.CreateKey<Report>("report", "k4");
+
+            await this.cacheHandler.AddOrUpdate(key, d, DateTime.UtcNow.AddDays(1), "report");
+
+            await Task.Delay(1000);
+
+            var r = await this.cacheHandler.Contains(key);
+
+            Assert.IsTrue(r);
+        }
+        [Test]
+        public async void RemoveTag_WhenGivenValidTag_ShouldRemoveData()
+        {
+            var d = new Report()
+            {
+                Items = new List<ReportItem>()
+                            {
+                                new ReportItem() { Key = "1", Data = 100 }
+                            }
+            };
+
+            var key = this.cacheHandler.CreateKey<Report>("report", "k4");
+
+            await this.cacheHandler.AddOrUpdate(key, d, DateTime.UtcNow.AddDays(1), "report");
+
+            await Task.Delay(1000);
+
+            await this.cacheHandler.RemoveTags("report");
+
+            await Task.Delay(1000);
+
+            var r = await this.cacheHandler.Contains(key);
+
+            Assert.IsFalse(r);
+        }
+        [Test]
+        public async void RemoveSpesificTag_WhenGivenValidTag_ShouldRemoveSpesificData()
+        {
+            var d = new Report()
+            {
+                Items = new List<ReportItem>()
+                            {
+                                new ReportItem() { Key = "1", Data = 100 }
+                            }
+            };
+
+            var key = this.cacheHandler.CreateKey<Report>("report", "k4");
+
+            await this.cacheHandler.AddOrUpdate(key, d, DateTime.UtcNow.AddDays(1), "report");
+
+            var d2 = new Report()
+            {
+                Items = new List<ReportItem>()
+                            {
+                                new ReportItem() { Key = "1", Data = 100 }
+                            }
+            };
+
+            var key2 = this.cacheHandler.CreateKey<Report>("report2", "k4");
+
+            await this.cacheHandler.AddOrUpdate(key2, d2, DateTime.UtcNow.AddDays(1), "report2");
+
+            await Task.Delay(1000);
+
+            await this.cacheHandler.RemoveTags("report");
+
+            var r = await this.cacheHandler.Contains(key);
+            var r2 = await this.cacheHandler.Contains(key2);
+
+            Assert.IsFalse(r);
+            Assert.IsTrue(r2);
+
+        }
 
         [Test]
         public async void AddOrUpdate_WhenGivenValidHashSetData_ShouldInsertData()

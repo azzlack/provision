@@ -157,7 +157,7 @@
         /// <param name="item">The item.</param>
         /// <param name="expires">The expire time.</param>
         /// <returns>A task.</returns>
-        public virtual async Task<T> AddOrUpdate<T>(string key, T item, DateTimeOffset expires)
+        public virtual async Task<T> AddOrUpdate<T>(string key, T item, DateTimeOffset expires, params string[] tags)
         {
             return item;
         }
@@ -180,6 +180,16 @@
         public virtual async Task<bool> RemoveAll(string pattern)
         {
             return await this.RemoveAll(new Regex(pattern));
+        }
+
+        /// <summary>
+        /// Removes all cache items matching the specified tags.
+        /// </summary>
+        /// <param name="tags">The tags.</param>
+        /// <returns><c>True</c> if successful, <c>false</c> otherwise.</returns>
+        public virtual async Task<bool> RemoveTags(params string[] tags)
+        {
+            return false;
         }
 
         /// <summary>

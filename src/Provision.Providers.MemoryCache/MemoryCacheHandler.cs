@@ -4,6 +4,8 @@
     using Provision.Interfaces;
     using Provision.Models;
     using System;
+    using System.Collections.Concurrent;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Runtime.Caching;
     using System.Text.RegularExpressions;
@@ -16,12 +18,15 @@
         /// </summary>
         private MemoryCache cache;
 
+        private readonly ConcurrentDictionary<string, HashSet<string>> cacheTags;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="MemoryCacheHandler"/> class.
         /// </summary>
         public MemoryCacheHandler()
         {
             this.cache = new MemoryCache("Provision");
+            this.cacheTags = new ConcurrentDictionary<string, HashSet<string>>();
         }
 
         /// <summary>
@@ -32,7 +37,7 @@
             : base(configuration)
         {
             this.cache = new MemoryCache("Provision");
-
+            this.cacheTags = new ConcurrentDictionary<string, HashSet<string>>();
         }
 
         /// <summary>
@@ -111,8 +116,9 @@
         /// <param name="key">The key.</param>
         /// <param name="item">The item.</param>
         /// <param name="expires">The expire time.</param>
+        /// <param name="tags">The cache tags</param>
         /// <returns>A task.</returns>
-        public override async Task<T> AddOrUpdate<T>(string key, T item, DateTimeOffset expires)
+        public override async Task<T> AddOrUpdate<T>(string key, T item, DateTimeOffset expires, params string[] tags)
         {
             if (item != null)
             {
@@ -132,6 +138,16 @@
                 else
                 {
                     this.cache.Set(key, new CacheItem<T>(key, item, expires.UtcDateTime), expires);
+                }
+                // Attach keys to tags
+                foreach (var tag in tags)
+                {
+                    this.cacheTags.AddOrUpdate(tag, new HashSet<string>{key}, 
+                        (k, existingVal) =>
+                    {
+                        existingVal.Add(key);
+                        return existingVal;
+                    });
                 }
 
                 if (typeof(IExpires).IsAssignableFrom(typeof(T)) && expires.UtcDateTime > DateTime.UtcNow)
@@ -178,6 +194,34 @@
                     if (regex.Match(item.Key).Success)
                     {
                         await this.Remove(item.Key);
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+        /// <summary>
+        /// Removes all cache items matching the specified tags.
+        /// </summary>
+        /// <param name="tags">The tags.</param>
+        /// <returns><c>True</c> if successful, <c>false</c> otherwise.</returns>
+        public async override Task<bool> RemoveTags(params string[] tags)
+        {
+            try
+            {
+                foreach (var tag in tags)
+                {
+                    foreach (var key in this.cacheTags[tag])
+                    {
+                        var itemRemoved = await this.Remove(key);
+                        if (itemRemoved)
+                        {
+                            this.cacheTags[tag].Remove(key);
+                        }
                     }
                 }
 
