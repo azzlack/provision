@@ -6,6 +6,6 @@
 
     public class ExpireableReport : IExpires
     {
-        public DateTime Expires { get; set; }
+        public DateTimeOffset Expires { get; set; }
     }
 }

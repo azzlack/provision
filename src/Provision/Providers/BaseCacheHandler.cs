@@ -39,7 +39,7 @@
             {
                 var cron = new CronExpression(this.Configuration.ExpireTime);
 
-                var expires = cron.GetNextValidTimeAfter(DateTime.UtcNow) ?? new DateTimeOffset(DateTime.UtcNow, new TimeSpan(0, 0, 1, 0));
+                var expires = cron.GetNextValidTimeAfter(DateTimeOffset.UtcNow) ?? new DateTimeOffset(DateTime.UtcNow, new TimeSpan(0, 0, 1, 0));
 
                 return TimeZoneInfo.ConvertTime(expires, cron.TimeZone);
             }

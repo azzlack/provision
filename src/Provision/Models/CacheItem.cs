@@ -16,7 +16,7 @@
         private CacheItem(string key = "")
         {
             this.Key = key;
-            this.Expires = DateTime.UtcNow;
+            this.Expires = DateTimeOffset.UtcNow;
         }
 
         /// <summary>
@@ -25,7 +25,7 @@
         /// <param name="key">The key.</param>
         /// <param name="item">The item.</param>
         /// <param name="expires">The expire time.</param>
-        public CacheItem(string key, T item, DateTime expires)
+        public CacheItem(string key, T item, DateTimeOffset expires)
         {
             this.Key = key;
             this.Expires = expires;
@@ -36,7 +36,7 @@
         /// Gets or sets the expires.
         /// </summary>
         /// <value>The expires.</value>
-        public DateTime Expires { get; set; }
+        public DateTimeOffset Expires { get; set; }
 
         /// <summary>
         /// Gets or sets the key.
@@ -65,7 +65,7 @@
         /// <summary>Initializes the specified value.</summary>
         /// <param name="value">The value.</param>
         /// <param name="expires">The expires.</param>
-        public void Initialize(T value, DateTime expires)
+        public void Initialize(T value, DateTimeOffset expires)
         {
             this.Value = value;
             this.Expires = expires;

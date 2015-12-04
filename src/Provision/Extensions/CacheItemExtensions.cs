@@ -19,10 +19,10 @@
         /// <param name="cacheItem">The cache item.</param>
         public static void MergeExpire<T>(this ICacheItem<T> cacheItem)
         {
-            if (cacheItem.HasValue && cacheItem.Expires.ToUniversalTime() > DateTime.MinValue)
+            if (cacheItem.HasValue && cacheItem.Expires > DateTimeOffset.MinValue)
             {
                 if (typeof(IExpires).GetTypeInfo().IsAssignableFrom(typeof(T).GetTypeInfo())
-                    && ((IExpires)cacheItem.Value).Expires.ToUniversalTime() == DateTime.MinValue)
+                    && ((IExpires)cacheItem.Value).Expires == DateTimeOffset.MinValue)
                 {
                     ((IExpires)cacheItem.Value).Expires = cacheItem.Expires;
                 }

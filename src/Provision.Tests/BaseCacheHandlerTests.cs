@@ -45,7 +45,7 @@
 
             var key = this.CacheHandler.CreateKey<Report>("report", "k4");
 
-            await this.CacheHandler.AddOrUpdate(key, d, DateTime.UtcNow.AddDays(1));
+            await this.CacheHandler.AddOrUpdate(key, d, DateTimeOffset.UtcNow.AddDays(1));
 
             var r = await this.CacheHandler.Contains(key);
 
@@ -65,7 +65,7 @@
 
             var key = this.CacheHandler.CreateKey<Report>("report", "k4");
 
-            await this.CacheHandler.AddOrUpdate(key, d, DateTime.UtcNow.AddDays(1), "report");
+            await this.CacheHandler.AddOrUpdate(key, d, DateTimeOffset.UtcNow.AddDays(1), "report");
 
             var r = await this.CacheHandler.Contains(key);
 
@@ -85,7 +85,7 @@
 
             var key = this.CacheHandler.CreateKey<Report>("report", "k4");
 
-            await this.CacheHandler.AddOrUpdate(key, d, DateTime.UtcNow.AddDays(1), "report");
+            await this.CacheHandler.AddOrUpdate(key, d, DateTimeOffset.UtcNow.AddDays(1), "report");
 
             await this.CacheHandler.RemoveByTag("report");
 
@@ -107,7 +107,7 @@
 
             var key1 = this.CacheHandler.CreateKey<Report>("report", "k4");
 
-            await this.CacheHandler.AddOrUpdate(key1, d, DateTime.UtcNow.AddDays(1), "report");
+            await this.CacheHandler.AddOrUpdate(key1, d, DateTimeOffset.UtcNow.AddDays(1), "report");
 
             var d2 = new Report()
             {
@@ -119,7 +119,7 @@
 
             var key2 = this.CacheHandler.CreateKey<Report>("report2", "k4");
 
-            await this.CacheHandler.AddOrUpdate(key2, d2, DateTime.UtcNow.AddDays(1), "report2");
+            await this.CacheHandler.AddOrUpdate(key2, d2, DateTimeOffset.UtcNow.AddDays(1), "report2");
 
             await this.CacheHandler.RemoveByTag("report");
 
@@ -178,7 +178,7 @@
 
             var key = this.CacheHandler.CreateKey<Report>("report", "k54");
 
-            await this.CacheHandler.AddOrUpdate(key, d, DateTime.UtcNow.AddDays(1));
+            await this.CacheHandler.AddOrUpdate(key, d, DateTimeOffset.UtcNow.AddDays(1));
 
             var r = await this.CacheHandler.GetValue<Report>(key);
 
@@ -201,7 +201,7 @@
 
             var key = this.CacheHandler.CreateKey<Report>(segments);
 
-            await this.CacheHandler.AddOrUpdate(key, d, DateTime.UtcNow.AddDays(-1));
+            await this.CacheHandler.AddOrUpdate(key, d, DateTimeOffset.UtcNow.AddDays(-1));
 
             var r = await this.CacheHandler.Get<Report>(key);
 
@@ -239,13 +239,13 @@
             var d = new Report();
 
             var key1 = this.CacheHandler.CreateKey<Report>("reports", "love", "ks", "2013");
-            await this.CacheHandler.AddOrUpdate(key1, d, DateTime.UtcNow.AddMinutes(1));
+            await this.CacheHandler.AddOrUpdate(key1, d, DateTimeOffset.UtcNow.AddMinutes(1));
 
             var key2 = this.CacheHandler.CreateKey<Report>("reports", "love", "ks", "2014");
-            await this.CacheHandler.AddOrUpdate(key2, d, DateTime.UtcNow.AddMinutes(1));
+            await this.CacheHandler.AddOrUpdate(key2, d, DateTimeOffset.UtcNow.AddMinutes(1));
 
             var key3 = this.CacheHandler.CreateKey<Report>("letter", "love", "ks", "2014");
-            await this.CacheHandler.AddOrUpdate(key3, d, DateTime.UtcNow.AddMinutes(1));
+            await this.CacheHandler.AddOrUpdate(key3, d, DateTimeOffset.UtcNow.AddMinutes(1));
 
             await this.CacheHandler.RemoveByPattern($"{this.Prefix}reports{this.Separator}love{this.Separator}ks{this.Separator}*");
 
@@ -264,13 +264,13 @@
             var d = new Report();
 
             var key1 = this.CacheHandler.CreateKey<Report>("reports", "love", "ks", "2013");
-            await this.CacheHandler.AddOrUpdate(key1, d, DateTime.UtcNow.AddMinutes(1));
+            await this.CacheHandler.AddOrUpdate(key1, d, DateTimeOffset.UtcNow.AddMinutes(1));
 
             var key2 = this.CacheHandler.CreateKey<Report>("reports", "love", "ks", "2014");
-            await this.CacheHandler.AddOrUpdate(key2, d, DateTime.UtcNow.AddMinutes(1));
+            await this.CacheHandler.AddOrUpdate(key2, d, DateTimeOffset.UtcNow.AddMinutes(1));
 
             var key3 = this.CacheHandler.CreateKey<Report>("letter", "love", "ks", "2014");
-            await this.CacheHandler.AddOrUpdate(key3, d, DateTime.UtcNow.AddMinutes(1));
+            await this.CacheHandler.AddOrUpdate(key3, d, DateTimeOffset.UtcNow.AddMinutes(1));
 
             await this.CacheHandler.RemoveByPattern($"{this.Prefix}reports{this.Separator}love{this.Separator}ks{this.Separator}*");
 
@@ -292,13 +292,13 @@
 
             await this.CacheHandler.AddOrUpdate(key, d);
 
-            var r1 = await this.CacheHandler.Contains($"{this.Prefix}reports{this.Separator}football{this.Separator}k4{this.Separator}2014");
+            var r1 = await this.CacheHandler.Contains(key);
 
             Assert.IsTrue(r1);
 
             var p = await this.CacheHandler.Purge();
 
-            var r2 = await this.CacheHandler.Contains($"{this.Prefix}reports{this.Separator}football{this.Separator}k4{this.Separator}2014");
+            var r2 = await this.CacheHandler.Contains(key);
 
             Assert.IsFalse(r2);
         }

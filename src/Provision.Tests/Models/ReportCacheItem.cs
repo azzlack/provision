@@ -15,7 +15,7 @@
         /// Gets or sets the expires.
         /// </summary>
         /// <value>The expires.</value>
-        public DateTime Expires { get; set; }
+        public DateTimeOffset Expires { get; set; }
 
         /// <summary>
         /// Gets the value.
@@ -46,7 +46,7 @@
         /// </summary>
         /// <param name="value">The value.</param>
         /// <param name="expires">The expiry date.</param>
-        public void Initialize(Report value, DateTime expires)
+        public void Initialize(Report value, DateTimeOffset expires)
         {
             this.report = value;
             this.Expires = expires;

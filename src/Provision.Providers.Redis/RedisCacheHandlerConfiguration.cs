@@ -88,6 +88,12 @@
         /// <value>The max number of zipmap entries.</value>
         public int MaxZipMapEntries => this.GetPropertyValue<int>("maxZipMapEntries");
 
+        /// <summary>The tag key.</summary>
+        public string TagKey => $"{this.Prefix}{this.Separator}{"_tags"}";
+
+        /// <summary>The index key.</summary>
+        public string IndexKey => $"{this.Prefix}{this.Separator}{"_keys"}";
+
         /// <summary>Gets the server connection.</summary>
         /// <value>The server connection.</value>
         public IConnectionMultiplexer Connection

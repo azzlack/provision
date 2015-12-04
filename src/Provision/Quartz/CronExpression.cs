@@ -348,7 +348,8 @@ namespace Provision.Quartz
         /// </summary>
         protected bool expressionParsed;
 
-        public static readonly int MaxYear = DateTime.UtcNow.Year + 100;
+        /// <summary>The maximum year.</summary>
+        public static readonly int MaxYear = DateTimeOffset.UtcNow.Year + 100;
 
         static CronExpression()
         {

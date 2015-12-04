@@ -71,7 +71,12 @@
                 // Set expiry date if applicable
                 item.MergeExpire();
 
-                if (item.Expires < DateTime.UtcNow)
+                if (item.Expires == DateTimeOffset.MinValue)
+                {
+                    return Task.FromResult(item);
+                }
+
+                if (item.Expires < DateTimeOffset.UtcNow)
                 {
                     return Task.FromResult(CacheItem<T>.Empty(key));
                 }
@@ -121,7 +126,7 @@
                     });
                 }
 
-                if (typeof(IExpires).IsAssignableFrom(typeof(T)) && expires.UtcDateTime > DateTime.UtcNow)
+                if (typeof(IExpires).IsAssignableFrom(typeof(T)) && expires.UtcDateTime > DateTimeOffset.UtcNow)
                 {
                     ((IExpires)item).Expires = expires.UtcDateTime;
                 }

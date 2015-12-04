@@ -11,6 +11,6 @@
         /// Gets or sets the expire time.
         /// </summary>
         /// <value>The expire time.</value>
-        DateTime Expires { get; set; }
+        DateTimeOffset Expires { get; set; }
     }
 }

@@ -82,12 +82,12 @@
                     // Set expiry date if applicable
                     item.MergeExpire();
 
-                    if (item.Expires.ToUniversalTime() == DateTime.MinValue)
+                    if (item.Expires == DateTimeOffset.MinValue)
                     {
                         return item;
                     }
 
-                    if (item.Expires < DateTime.UtcNow)
+                    if (item.Expires < DateTimeOffset.UtcNow)
                     {
                         return CacheItem<T>.Empty(key);
                     }
@@ -142,7 +142,7 @@
                         });
                 }
 
-                if (typeof(IExpires).GetTypeInfo().IsAssignableFrom(typeof(T).GetTypeInfo()) && expires.UtcDateTime > DateTime.UtcNow)
+                if (typeof(IExpires).GetTypeInfo().IsAssignableFrom(typeof(T).GetTypeInfo()) && expires.UtcDateTime > DateTimeOffset.UtcNow)
                 {
                     ((IExpires)item).Expires = expires.UtcDateTime;
                 }

@@ -6,8 +6,10 @@
     using Provision.Extensions;
     using Provision.Interfaces;
     using Provision.Models;
+    using Provision.Providers.Redis.Extensions;
     using StackExchange.Redis;
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Security.Cryptography;
     using System.Text;
@@ -60,17 +62,6 @@
             this.log = log;
         }
 
-        private async Task AddOrUpdateCacheTags(string cacheKey, params string[] tags)
-        {
-            var db = this.configuration.Connection.GetDatabase();
-
-            foreach (var tag in tags)
-            {
-
-                await db.HashSetAsync($"{this.configuration.Prefix}:{"_tags"}:{tag}", cacheKey, cacheKey);
-            }
-        }
-
         /// <summary>
         /// Creates a cache item key from the specified segments.
         /// </summary>
@@ -90,14 +81,14 @@
             var seg = segments.Select(
                     x =>
                     x.ToString().Length <= 128
-                        ? x.ToString().Replace(':', '-')
+                        ? x.ToString().Replace(this.configuration.Separator, "-")
                         : Convert.ToBase64String(this.hashProvider.ComputeHash(Encoding.UTF8.GetBytes(x.ToString()))));
 
-            var key = $"{this.configuration.Prefix}:{string.Join(":", seg)}";
+            var key = $"{this.configuration.Prefix}{this.configuration.Separator}{string.Join(this.configuration.Separator, seg)}";
 
             if (string.IsNullOrEmpty(this.configuration.Prefix))
             {
-                key = $"{string.Join(":", segments.Select(x => x.ToString().Replace(':', '-')))}";
+                key = $"{string.Join(this.configuration.Separator, segments.Select(x => x.ToString().Replace(this.configuration.Separator, "-")))}";
             }
 
             return key;
@@ -110,7 +101,7 @@
         /// <returns><c>true</c> if a cache item exists, <c>false</c> otherwise.</returns>
         public override async Task<bool> Contains(string key)
         {
-            var start = DateTime.UtcNow;
+            var start = DateTimeOffset.UtcNow;
 
             var exists = false;
 
@@ -151,7 +142,7 @@
                 this.log.Error("Error when connecting to database", ex);
             }
 
-            this.log.InfoFormat("RedisCacheHandler.Contains({1}) Time: {0}s", DateTime.UtcNow.Subtract(start).TotalSeconds, key);
+            this.log.InfoFormat("RedisCacheHandler.Contains({1}) Time: {0}s", DateTimeOffset.UtcNow.Subtract(start).TotalSeconds, key);
 
             return exists;
         }
@@ -164,7 +155,7 @@
         /// <returns>The cache item.</returns>
         public override async Task<ICacheItem<T>> Get<T>(string key)
         {
-            var start = DateTime.UtcNow;
+            var start = DateTimeOffset.UtcNow;
 
             try
             {
@@ -175,7 +166,7 @@
                 try
                 {
                     RedisValue data;
-                    var expires = DateTime.MinValue;
+                    var expires = DateTimeOffset.MinValue;
 
                     if (key.Contains("#"))
                     {
@@ -189,7 +180,7 @@
                         var ttl = await db.KeyTimeToLiveAsync(h);
                         if (ttl.HasValue && ttl < TimeSpan.MaxValue && ttl.Value.TotalSeconds > 0)
                         {
-                            expires = DateTime.UtcNow.Add(ttl.Value);
+                            expires = DateTimeOffset.UtcNow.Add(ttl.Value);
                         }
                     }
                     else
@@ -201,7 +192,7 @@
                         var ttl = await db.KeyTimeToLiveAsync(key);
                         if (ttl.HasValue && ttl < TimeSpan.MaxValue && ttl.Value.TotalSeconds > 0)
                         {
-                            expires = DateTime.UtcNow.Add(ttl.Value);
+                            expires = DateTimeOffset.UtcNow.Add(ttl.Value);
                         }
                     }
 
@@ -234,7 +225,7 @@
                     else
                     {
                         this.log.DebugFormat("Retrieved cache item with key '{0}' and type '{1}'. It expires at {2}", key, typeof(T), expires);
-                        this.log.InfoFormat("RedisCacheHandler.GetCacheItem<{2}>({1}) Time: {0}s", DateTime.UtcNow.Subtract(start).TotalSeconds, key, typeof(T));
+                        this.log.InfoFormat("RedisCacheHandler.GetCacheItem<{2}>({1}) Time: {0}s", DateTimeOffset.UtcNow.Subtract(start).TotalSeconds, key, typeof(T));
 
                         var ci = new CacheItem<T>(key, result, expires);
                         ci.MergeExpire();
@@ -252,20 +243,9 @@
                 this.log.Error("Error when connecting to database", ex);
             }
 
-            this.log.InfoFormat("(ERROR) RedisCacheHandler.GetCacheItem<{2}>({1}) Time: {0}s", DateTime.UtcNow.Subtract(start).TotalSeconds, key, typeof(T));
+            this.log.InfoFormat("(ERROR) RedisCacheHandler.GetCacheItem<{2}>({1}) Time: {0}s", DateTimeOffset.UtcNow.Subtract(start).TotalSeconds, key, typeof(T));
 
             return CacheItem<T>.Empty(key);
-        }
-
-        /// <summary>Adds or updates a cache item with specified key and object.</summary>
-        /// <typeparam name="T">The item type.</typeparam>
-        /// <param name="key">The key.</param>
-        /// <param name="item">The item.</param>
-        /// <param name="tags">The tags.</param>
-        /// <returns>A task.</returns>
-        public override Task<T> AddOrUpdate<T>(string key, T item, params string[] tags)
-        {
-            return this.AddOrUpdate(key, item, this.ExpireTime.UtcDateTime, tags);
         }
 
         /// <summary>Adds or updates a cache item with specified key and object.</summary>
@@ -277,7 +257,7 @@
         /// <returns>A task.</returns>
         public override async Task<T> AddOrUpdate<T>(string key, T item, DateTimeOffset expires, params string[] tags)
         {
-            var start = DateTime.UtcNow;
+            var start = DateTimeOffset.UtcNow;
 
             if (item != null)
             {
@@ -287,7 +267,7 @@
 
                     try
                     {
-                        var inserted = true;
+                        bool inserted;
 
                         byte[] data;
 
@@ -310,7 +290,6 @@
                             // Add data to db
                             inserted = await db.HashSetAsync(h, k, data);
 
-
                             // Make item expire
                             await db.KeyExpireAsync(h, expires.UtcDateTime);
                         }
@@ -323,7 +302,8 @@
                             await db.KeyExpireAsync(key, expires.UtcDateTime);
                         }
 
-                        await this.AddOrUpdateCacheTags(key, tags);
+                        await this.AddOrUpdateKeyIndex(key, expires);
+                        await this.AddOrUpdateTagIndex(tags, key, expires);
 
                         this.log.DebugFormat(
                             inserted
@@ -332,14 +312,14 @@
                             key);
 
                         // Set expires time if item is expireable
-                        if (typeof(IExpires).IsAssignableFrom(typeof(T)) && expires.UtcDateTime > DateTime.UtcNow)
+                        if (typeof(IExpires).IsAssignableFrom(typeof(T)) && expires.UtcDateTime > DateTimeOffset.UtcNow)
                         {
                             ((IExpires)item).Expires = expires.UtcDateTime;
                         }
 
                         this.log.InfoFormat(
                             "RedisCacheHandler.AddOrUpdate<{2}>({1}, {2}, {3}) Time: {0}s",
-                            DateTime.UtcNow.Subtract(start).TotalSeconds,
+                            DateTimeOffset.UtcNow.Subtract(start).TotalSeconds,
                             key,
                             typeof(T),
                             expires);
@@ -359,7 +339,7 @@
 
             this.log.InfoFormat(
                 "RedisCacheHandler.AddOrUpdate<{2}>({1}, {2}, {3}) Time: {0}s (Error)",
-                DateTime.UtcNow.Subtract(start).TotalSeconds,
+                DateTimeOffset.UtcNow.Subtract(start).TotalSeconds,
                 key,
                 typeof(T),
                 expires);
@@ -375,7 +355,7 @@
         /// <exception cref="System.ArgumentException">Error when removing key from database</exception>
         public override async Task<bool> RemoveByKey(string key)
         {
-            var start = DateTime.UtcNow;
+            var start = DateTimeOffset.UtcNow;
 
             var removed = false;
 
@@ -401,7 +381,7 @@
 
                     if (!removed)
                     {
-                        throw new ArgumentException(string.Format("Error when removing key '{0}' to database", key));
+                        throw new ArgumentException($"Error when removing key '{key}' to database");
                     }
                 }
                 catch (Exception ex)
@@ -418,7 +398,7 @@
 
             this.log.InfoFormat(
                 "RedisCacheHandler.RemoveByKey({1}) Time: {0}s",
-                DateTime.UtcNow.Subtract(start).TotalSeconds,
+                DateTimeOffset.UtcNow.Subtract(start).TotalSeconds,
                 key);
 
             return removed;
@@ -431,7 +411,7 @@
         /// <returns><c>True</c> if successful, <c>false</c> otherwise.</returns>
         public override async Task<bool> RemoveByPattern(string pattern)
         {
-            var start = DateTime.UtcNow;
+            var start = DateTimeOffset.UtcNow;
 
             var removed = false;
 
@@ -466,7 +446,7 @@
 
             this.log.InfoFormat(
                 "RedisCacheHandler.RemoveByPattern({1}) Time: {0}s",
-                DateTime.UtcNow.Subtract(start).TotalSeconds,
+                DateTimeOffset.UtcNow.Subtract(start).TotalSeconds,
                 pattern);
 
             return removed;
@@ -477,14 +457,17 @@
         /// </summary>
         /// <param name="regex">The regular expression.</param>
         /// <returns><c>True</c> if successful, <c>false</c> otherwise.</returns>
-        public override async Task<bool> RemoveByPattern(Regex regex)
+        public override Task<bool> RemoveByPattern(Regex regex)
         {
             throw new NotSupportedException("Redis does not support regular expression matching");
         }
 
+        /// <summary>Removes all cache items matching the specified tags.</summary>
+        /// <param name="tags">The tags.</param>
+        /// <returns><c>True</c> if successful, <c>false</c> otherwise.</returns>
         public override async Task<bool> RemoveByTag(params string[] tags)
         {
-            var start = DateTime.UtcNow;
+            var start = DateTimeOffset.UtcNow;
 
             try
             {
@@ -494,16 +477,12 @@
                 {
                     foreach (var tag in tags)
                     {
-                        var tagsCacheKey = string.Format("{0}:{1}:{2}", this.configuration.Prefix, "_tags", tag);
+                        var tagKey = $"{this.configuration.TagKey}{this.configuration.Separator}{tag}";
 
-                        var keys = await database.HashGetAllAsync(tagsCacheKey);
+                        var keys = await database.SortedSetRangeByScoreAsync(tagKey, DateTimeOffset.UtcNow.ToUnixTime(), DateTimeOffset.MaxValue.ToUnixTime());
 
-                        foreach (var key in keys)
-                        {
-                            await database.KeyDeleteAsync(key.Name.ToString());
-                        }
-
-                        await database.KeyDeleteAsync(tagsCacheKey);
+                        await database.KeyDeleteAsync(keys.Select(x => (RedisKey)x.ToString()).ToArray());
+                        await database.KeyDeleteAsync(tagKey);
                     }
                 }
                 catch (Exception ex)
@@ -521,10 +500,7 @@
 
             this.log.DebugFormat("Successfully removed cache items matching tags '{0}'", string.Join(",", tags));
 
-            this.log.InfoFormat(
-                "RedisCacheHandler.RemoveByTag({1}) Time: {0}s",
-                DateTime.UtcNow.Subtract(start).TotalSeconds,
-                string.Join(",", tags));
+            this.log.InfoFormat("RedisCacheHandler.RemoveByTag({1}) Time: {0}s", DateTimeOffset.UtcNow.Subtract(start).TotalSeconds, string.Join(",", tags));
 
             return true;
         }
@@ -535,42 +511,36 @@
         /// <returns><c>True</c> if successful, <c>false</c> otherwise.</returns>
         public override async Task<bool> Purge()
         {
-            var start = DateTime.UtcNow;
+            var start = DateTimeOffset.UtcNow;
 
             var purged = false;
 
             try
             {
-                var server = this.configuration.Connection.GetServer(this.configuration.Host, this.configuration.Port);
                 var db = this.configuration.Connection.GetDatabase();
 
                 try
                 {
-                    if (!string.IsNullOrEmpty(this.configuration.Prefix))
-                    {
-                        this.log.DebugFormat(
-                            "Purging cache with prefix '{0}' in database {1}#{2}",
-                            this.configuration.Prefix,
-                            this.configuration.Host,
-                            this.configuration.Database);
-                        var keys = server.Keys(this.configuration.Database, $"{this.configuration.Prefix}:*");
+                    this.log.DebugFormat(
+                        "Purging cache with prefix '{0}' in database {1}#{2}",
+                        this.configuration.Prefix,
+                        this.configuration.Host,
+                        this.configuration.Database);
 
-                        foreach (var key in keys)
-                        {
-                            await db.KeyDeleteAsync(key);
-                        }
-                    }
-                    else
-                    {
-                        this.log.DebugFormat(
-                            "Purging cache in database {0}#{1}",
-                            this.configuration.Host,
-                            this.configuration.Database);
+                    var keys = new List<RedisKey>();
 
-                        await server.FlushDatabaseAsync(this.configuration.Database);
+                    // Get all keys expiring in the future from index
+                    foreach (var entry in await db.SortedSetRangeByScoreAsync(this.configuration.IndexKey, DateTimeOffset.UtcNow.ToUnixTime(), DateTimeOffset.MaxValue.ToUnixTime()))
+                    {
+                        keys.Add(entry.ToString());
                     }
 
-                    purged = true;
+                    // Delete keys
+                    await db.KeyDeleteAsync(keys.ToArray());
+
+                    // Delete indexes
+                    await db.KeyDeleteAsync(this.configuration.IndexKey);
+                    await db.KeyDeleteAsync(this.configuration.TagKey);
                 }
                 catch (Exception ex)
                 {
@@ -582,11 +552,48 @@
                 this.log.Error("Error when connecting to database", ex);
             }
 
-            this.log.InfoFormat(
-                    "RedisCacheHandler.Purge() Time: {0}s",
-                    DateTime.UtcNow.Subtract(start).TotalSeconds);
+            this.log.InfoFormat("RedisCacheHandler.Purge() Time: {0}s", DateTimeOffset.UtcNow.Subtract(start).TotalSeconds);
 
             return purged;
+        }
+
+        /// <summary>Adds or updates the specified tag collections with the specified key.</summary>
+        /// <param name="tags">The tags.</param>
+        /// <param name="key">The cache key.</param>
+        /// <param name="expires">The expire time.</param>
+        /// <returns>An async void.</returns>
+        private async Task AddOrUpdateTagIndex(string[] tags, string key, DateTimeOffset expires)
+        {
+            var db = this.configuration.Connection.GetDatabase();
+
+            foreach (var tag in tags)
+            {
+                await db.SortedSetAddAsync($"{this.configuration.TagKey}{this.configuration.Separator}{tag}", key, expires.ToUnixTime());
+            }
+        }
+
+        /// <summary>Adds or updated the key index with the specified data.</summary>
+        /// <param name="key">The key.</param>
+        /// <param name="expires">The expire time.</param>
+        /// <returns>An async void.</returns>
+        private async Task AddOrUpdateKeyIndex(string key, DateTimeOffset expires)
+        {
+            var db = this.configuration.Connection.GetDatabase();
+
+            var score = expires > DateTimeOffset.MinValue ? expires.ToUnixTime() : double.MaxValue;
+
+            // Update score if key exists, otherwise add it
+            var oldScore = await db.SortedSetScoreAsync(this.configuration.IndexKey, key);
+            if (oldScore.HasValue)
+            {
+                var newScore = (score - oldScore.Value) > DateTimeOffsetExtensions.Epoch.ToUnixTime() ? score - oldScore.Value : DateTimeOffsetExtensions.Epoch.ToUnixTime();
+
+                await db.SortedSetIncrementAsync(this.configuration.IndexKey, key, newScore);
+            }
+            else
+            {
+                await db.SortedSetAddAsync(this.configuration.IndexKey, key, score);
+            }
         }
     }
 }
