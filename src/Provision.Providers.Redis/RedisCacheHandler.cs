@@ -419,16 +419,13 @@
 
             try
             {
-                var server = this.configuration.Connection.GetServer(this.configuration.Host, this.configuration.Port);
                 var db = this.configuration.Connection.GetDatabase();
 
                 try
                 {
-                    var keys = server.Keys(this.configuration.Database, pattern);
-                    foreach (var key in keys)
-                    {
-                        await db.KeyDeleteAsync(key);
-                    }
+                    var keys = db.SortedSetScan(this.configuration.IndexKey, pattern);
+
+                    await db.KeyDeleteAsync(keys.Select(x => (RedisKey)x.Element.ToString()).ToArray());
 
                     removed = true;
                 }
