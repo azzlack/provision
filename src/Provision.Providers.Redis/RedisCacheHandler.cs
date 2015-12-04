@@ -86,9 +86,19 @@
 
             var key = $"{this.configuration.Prefix}{this.configuration.Separator}{string.Join(this.configuration.Separator, seg)}";
 
+            // Add prefix
             if (string.IsNullOrEmpty(this.configuration.Prefix))
             {
                 key = $"{string.Join(this.configuration.Separator, segments.Select(x => x.ToString().Replace(this.configuration.Separator, "-")))}";
+            }
+
+            // Remove any separators before and after hash
+            if (key.Contains("#"))
+            {
+                var f = key.Split('#')[0].TrimEnd(Convert.ToChar(this.configuration.Separator));
+                var l = key.Split('#')[1].TrimStart(Convert.ToChar(this.configuration.Separator));
+
+                key = string.Join("#", f, l);
             }
 
             return key;
@@ -468,7 +478,7 @@
 
             try
             {
-                var database = this.configuration.Connection.GetDatabase();
+                var db = this.configuration.Connection.GetDatabase();
 
                 try
                 {
@@ -476,10 +486,25 @@
                     {
                         var tagKey = $"{this.configuration.TagKey}{this.configuration.Separator}{tag}";
 
-                        var keys = await database.SortedSetRangeByScoreAsync(tagKey, DateTimeOffset.UtcNow.ToUnixTime(), DateTimeOffset.MaxValue.ToUnixTime());
+                        var keys = new List<RedisKey>();
 
-                        await database.KeyDeleteAsync(keys.Select(x => (RedisKey)x.ToString()).ToArray());
-                        await database.KeyDeleteAsync(tagKey);
+                        // Get all keys expiring in the future from index
+                        foreach (var entry in await db.SortedSetRangeByScoreAsync(tagKey, DateTimeOffset.UtcNow.ToUnixTime(), DateTimeOffset.MaxValue.ToUnixTime()))
+                        {
+                            var k = entry.ToString();
+
+                            if (k.Contains("#"))
+                            {
+                                keys.Add(k.Split('#')[0]);
+                            }
+                            else
+                            {
+                                keys.Add(k);
+                            }
+                        }
+
+                        await db.KeyDeleteAsync(keys.ToArray());
+                        await db.KeyDeleteAsync(tagKey);
                     }
                 }
                 catch (Exception ex)
@@ -529,7 +554,16 @@
                     // Get all keys expiring in the future from index
                     foreach (var entry in await db.SortedSetRangeByScoreAsync(this.configuration.IndexKey, DateTimeOffset.UtcNow.ToUnixTime(), DateTimeOffset.MaxValue.ToUnixTime()))
                     {
-                        keys.Add(entry.ToString());
+                        var k = entry.ToString();
+
+                        if (k.Contains("#"))
+                        {
+                            keys.Add(k.Split('#')[0]);
+                        }
+                        else
+                        {
+                            keys.Add(k);
+                        }
                     }
 
                     // Delete keys

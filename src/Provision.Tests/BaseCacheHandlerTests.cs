@@ -94,8 +94,9 @@
             Assert.IsFalse(r);
         }
 
-        [Test]
-        public async void RemoveSpesificTag_WhenGivenValidTag_ShouldRemoveSpesificData()
+        [TestCase("report", "report2")]
+        [TestCase("report#", "report2#")]
+        public async void RemoveSpesificTag_WhenGivenValidTag_ShouldRemoveSpesificData(string k1, string k2)
         {
             var d = new Report()
             {
@@ -105,9 +106,9 @@
                             }
             };
 
-            var key1 = this.CacheHandler.CreateKey<Report>("report", "k4");
+            var key1 = this.CacheHandler.CreateKey<Report>(k1, "k4");
 
-            await this.CacheHandler.AddOrUpdate(key1, d, DateTimeOffset.UtcNow.AddDays(1), "report");
+            await this.CacheHandler.AddOrUpdate(key1, d, DateTimeOffset.UtcNow.AddDays(1), "tag1");
 
             var d2 = new Report()
             {
@@ -117,11 +118,11 @@
                             }
             };
 
-            var key2 = this.CacheHandler.CreateKey<Report>("report2", "k4");
+            var key2 = this.CacheHandler.CreateKey<Report>(k2, "k4");
 
-            await this.CacheHandler.AddOrUpdate(key2, d2, DateTimeOffset.UtcNow.AddDays(1), "report2");
+            await this.CacheHandler.AddOrUpdate(key2, d2, DateTimeOffset.UtcNow.AddDays(1), "tag2");
 
-            await this.CacheHandler.RemoveByTag("report");
+            await this.CacheHandler.RemoveByTag("tag1");
 
             var r = await this.CacheHandler.Contains(key1);
             var r2 = await this.CacheHandler.Contains(key2);
@@ -130,12 +131,13 @@
             Assert.IsTrue(r2);
         }
 
-        [Test]
-        public async void AddOrUpdate_WhenGivenValidData_ShouldInsertData()
+        [TestCase("reports", "blahblah", "k4", "2014")]
+        [TestCase("reports", "blahblah2#", "k4", "2014")]
+        public async void AddOrUpdate_WhenGivenValidData_ShouldInsertData(params string[] segments)
         {
             var d = new Report();
 
-            var key = this.CacheHandler.CreateKey<Report>("reports", "blahblah", "k4", "2014");
+            var key = this.CacheHandler.CreateKey<Report>(segments);
 
             await this.CacheHandler.AddOrUpdate(key, d);
 
@@ -144,12 +146,13 @@
             Assert.IsTrue(r);
         }
 
-        [Test]
-        public async void AddOrUpdate_WhenUpdatingEntry_ShouldNotMutate()
+        [TestCase("reports", "blahblah", "k4", "2014")]
+        [TestCase("reports", "blahblah2#", "k4", "2014")]
+        public async void AddOrUpdate_WhenUpdatingEntry_ShouldNotMutate(params string[] segments)
         {
             var d = new ReportItem() { Key = "Test1" };
 
-            var key = this.CacheHandler.CreateKey<Report>("reports", "blahblah", "k4", "2014");
+            var key = this.CacheHandler.CreateKey<Report>(segments);
 
             var obj1 = await this.CacheHandler.AddOrUpdate(key, d);
 
@@ -165,8 +168,9 @@
             Assert.AreNotEqual(obj2.Key, update.Key, "The item updated in the cache has mutated the earlier object");
         }
 
-        [Test]
-        public async void Get_WhenGivenExistingKey_ShouldReturnItem()
+        [TestCase("report", "k54")]
+        [TestCase("reports#", "k54")]
+        public async void Get_WhenGivenExistingKey_ShouldReturnItem(params string[] segments)
         {
             var d = new Report()
             {
@@ -176,7 +180,7 @@
                             }
             };
 
-            var key = this.CacheHandler.CreateKey<Report>("report", "k54");
+            var key = this.CacheHandler.CreateKey<Report>(segments);
 
             await this.CacheHandler.AddOrUpdate(key, d, DateTimeOffset.UtcNow.AddDays(1));
 
@@ -188,7 +192,7 @@
         }
 
         [TestCase("report", "k84")]
-        [TestCase("reporthash", "#", "k84")]
+        [TestCase("reporthash#", "k84")]
         public async void Get_WhenGivenExpiredKey_ShouldReturnNull(params string[] segments)
         {
             var d = new Report()
@@ -209,20 +213,23 @@
             Assert.IsNull(r.Value);
         }
 
-        [Test]
-        public async void Get_WhenGivenNonExistingKey_ShouldReturnNull()
+        [TestCase("report", "k445697894231,3")]
+        [TestCase("reports#", "k445697894231,3")]
+        public async void Get_WhenGivenNonExistingKey_ShouldReturnNull(params string[] segments)
         {
-            var r = await this.CacheHandler.GetValue<Report>($"{this.Prefix}report{this.Separator}k445697894231,3");
+            var k = this.CacheHandler.CreateKey(segments);
+            var r = await this.CacheHandler.GetValue<Report>(k);
 
             Assert.IsNull(r);
         }
 
-        [Test]
-        public async void Remove_WhenGivenValidKey_ShouldRemoveData()
+        [TestCase("reports", "training", "k5", "2014")]
+        [TestCase("reports", "training", "_overall#", "k5", "2014")]
+        public async void Remove_WhenGivenValidKey_ShouldRemoveData(params string[] segments)
         {
             var d = new Report();
 
-            var key = this.CacheHandler.CreateKey<Report>("reports", "training", "k5", "2014");
+            var key = this.CacheHandler.CreateKey<Report>(segments);
 
             await this.CacheHandler.AddOrUpdate(key, d);
 
