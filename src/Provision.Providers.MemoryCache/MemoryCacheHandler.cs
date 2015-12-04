@@ -13,36 +13,30 @@
 
     public class MemoryCacheHandler : BaseCacheHandler
     {
-        /// <summary>
-        /// The cache
-        /// </summary>
+        /// <summary>The tags.</summary>
+        private readonly ConcurrentDictionary<string, HashSet<string>> tags;
+
+        /// <summary>The cache.</summary>
         private MemoryCache cache;
 
-        private readonly ConcurrentDictionary<string, HashSet<string>> cacheTags;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MemoryCacheHandler"/> class.
-        /// </summary>
+        /// <summary>Initializes a new instance of the <see cref="MemoryCacheHandler"/> class.</summary>
         public MemoryCacheHandler()
         {
             this.cache = new MemoryCache("Provision");
-            this.cacheTags = new ConcurrentDictionary<string, HashSet<string>>();
+            this.tags = new ConcurrentDictionary<string, HashSet<string>>();
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MemoryCacheHandler"/> class.
-        /// </summary>
+        /// <summary>Initializes a new instance of the <see cref="MemoryCacheHandler"/> class.</summary>
         /// <param name="configuration">The configuration.</param>
         public MemoryCacheHandler(ICacheHandlerConfiguration configuration)
             : base(configuration)
         {
             this.cache = new MemoryCache("Provision");
-            this.cacheTags = new ConcurrentDictionary<string, HashSet<string>>();
+            this.tags = new ConcurrentDictionary<string, HashSet<string>>();
         }
 
-        /// <summary>
-        /// Creates a cache item key from the specified segments.
-        /// </summary>
+        /// <summary>Creates a cache item key from the specified segments.</summary>
+        /// <exception cref="ArgumentException">Thrown when one or more arguments have unsupported or illegal values.</exception>
         /// <param name="segments">The key segments.</param>
         /// <returns>A cache item key.</returns>
         public override string CreateKey(params object[] segments)
@@ -53,26 +47,22 @@
                 throw new ArgumentException("Cannot create key from null segments", nameof(segments));
             }
 
-            return string.Format("{0}", string.Join("_", segments));
+            return $"{string.Join(this.Configuration.Separator, segments)}";
         }
 
-        /// <summary>
-        /// Checks if an item with the specified key exists in the cache.
-        /// </summary>
+        /// <summary>Checks if an item with the specified key exists in the cache.</summary>
         /// <param name="key">The key.</param>
         /// <returns><c>true</c> if a cache item exists, <c>false</c> otherwise.</returns>
-        public override async Task<bool> Contains(string key)
+        public override Task<bool> Contains(string key)
         {
-            return this.cache.Contains(key);
+            return Task.FromResult(this.cache.Contains(key));
         }
 
-        /// <summary>
-        /// Gets the cache item with specified key.
-        /// </summary>
+        /// <summary>Gets the cache item with specified key.</summary>
         /// <typeparam name="T">The item type.</typeparam>
         /// <param name="key">The key.</param>
         /// <returns>The cache item.</returns>
-        public override async Task<ICacheItem<T>> Get<T>(string key)
+        public override Task<ICacheItem<T>> Get<T>(string key)
         {
             var item = this.cache.Get(key) as ICacheItem<T>;
 
@@ -81,44 +71,25 @@
                 // Set expiry date if applicable
                 item.MergeExpire();
 
-                if (item.Expires.ToUniversalTime() == DateTime.MinValue)
-                {
-                    return item;
-                }
-
                 if (item.Expires < DateTime.UtcNow)
                 {
-                    return CacheItem<T>.Empty(key);
+                    return Task.FromResult(CacheItem<T>.Empty(key));
                 }
 
-                return item;
+                return Task.FromResult(item);
             }
 
-            return CacheItem<T>.Empty(key);
+            return Task.FromResult(CacheItem<T>.Empty(key));
         }
 
-        /// <summary>
-        /// Adds or updates a cache item with specified key and object.
-        /// </summary>
-        /// <typeparam name="T">The item type.</typeparam>
-        /// <param name="key">The key.</param>
-        /// <param name="item">The item.</param>
-        /// <returns>A task.</returns>
-        public override async Task<T> AddOrUpdate<T>(string key, T item)
-        {
-            return await this.AddOrUpdate(key, item, this.ExpireTime);
-        }
-
-        /// <summary>
-        /// Sets a cache item with specified key and object.
-        /// </summary>
+        /// <summary>Sets a cache item with specified key and object.</summary>
         /// <typeparam name="T">The item type.</typeparam>
         /// <param name="key">The key.</param>
         /// <param name="item">The item.</param>
         /// <param name="expires">The expire time.</param>
-        /// <param name="tags">The cache tags</param>
+        /// <param name="tags">The cache tags.</param>
         /// <returns>A task.</returns>
-        public override async Task<T> AddOrUpdate<T>(string key, T item, DateTimeOffset expires, params string[] tags)
+        public override Task<T> AddOrUpdate<T>(string key, T item, DateTimeOffset expires, params string[] tags)
         {
             if (item != null)
             {
@@ -142,7 +113,7 @@
                 // Attach keys to tags
                 foreach (var tag in tags)
                 {
-                    this.cacheTags.AddOrUpdate(tag, new HashSet<string>{key}, 
+                    this.tags.AddOrUpdate(tag, new HashSet<string> { key },
                         (k, existingVal) =>
                     {
                         existingVal.Add(key);
@@ -155,10 +126,10 @@
                     ((IExpires)item).Expires = expires.UtcDateTime;
                 }
 
-                return item;
+                return Task.FromResult(item);
             }
 
-            return default(T);
+            return Task.FromResult(default(T));
         }
 
         /// <summary>
@@ -166,17 +137,17 @@
         /// </summary>
         /// <param name="key">The key.</param>
         /// <returns><c>True</c> if successful, <c>false</c> otherwise.</returns>
-        public override async Task<bool> Remove(string key)
+        public override Task<bool> RemoveByKey(string key)
         {
             try
             {
                 this.cache.Remove(key);
 
-                return true;
+                return Task.FromResult(true);
             }
             catch (Exception)
             {
-                return false;
+                return Task.FromResult(false);
             }
         }
 
@@ -185,15 +156,15 @@
         /// </summary>
         /// <param name="regex">The regular expression.</param>
         /// <returns><c>True</c> if successful, <c>false</c> otherwise.</returns>
-        public async override Task<bool> RemoveAll(Regex regex)
+        public override async Task<bool> RemoveByPattern(Regex regex)
         {
             try
             {
-                foreach (var item in cache)
+                foreach (var item in this.cache)
                 {
                     if (regex.Match(item.Key).Success)
                     {
-                        await this.Remove(item.Key);
+                        await this.RemoveByKey(item.Key);
                     }
                 }
 
@@ -209,18 +180,18 @@
         /// </summary>
         /// <param name="tags">The tags.</param>
         /// <returns><c>True</c> if successful, <c>false</c> otherwise.</returns>
-        public async override Task<bool> RemoveTags(params string[] tags)
+        public override async Task<bool> RemoveByTag(params string[] tags)
         {
             try
             {
                 foreach (var tag in tags)
                 {
-                    foreach (var key in this.cacheTags[tag])
+                    foreach (var key in this.tags[tag])
                     {
-                        var itemRemoved = await this.Remove(key);
+                        var itemRemoved = await this.RemoveByKey(key);
                         if (itemRemoved)
                         {
-                            this.cacheTags[tag].Remove(key);
+                            this.tags[tag].Remove(key);
                         }
                     }
                 }
@@ -233,17 +204,15 @@
             }
         }
 
-        /// <summary>
-        /// Purges all cache items.
-        /// </summary>
+        /// <summary>Purges all cache items.</summary>
         /// <returns><c>True</c> if successful, <c>false</c> otherwise.</returns>
-        public override async Task<bool> Purge()
+        public override Task<bool> Purge()
         {
             var oldCache = this.cache;
             this.cache = new MemoryCache("Provision");
             oldCache.Dispose();
 
-            return true;
+            return Task.FromResult(true);
         }
     }
 }

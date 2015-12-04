@@ -8,7 +8,7 @@
         /// Initializes a new instance of the <see cref="MemoryCacheHandlerConfiguration"/> class.
         /// </summary>
         public MemoryCacheHandlerConfiguration()
-            : base("mem", typeof(MemoryCacheHandler).GetTypeInfo())
+            : base("mem", typeof(MemoryCacheHandler).GetTypeInfo(), "_", "")
         {
         }
 
@@ -17,7 +17,7 @@
         /// </summary>
         /// <param name="expireTime">The expire time.</param>
         public MemoryCacheHandlerConfiguration(string expireTime = "0 0/1 * 1/1 * ? *")
-            : base("mem", typeof(MemoryCacheHandler).GetTypeInfo())
+            : base("mem", typeof(MemoryCacheHandler).GetTypeInfo(), "_", "")
         {
             this.Options["expireTime"] = expireTime;
         }

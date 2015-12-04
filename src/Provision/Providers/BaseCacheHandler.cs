@@ -5,6 +5,8 @@
     using Provision.Models;
     using Provision.Quartz;
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
 
@@ -75,9 +77,9 @@
         /// </summary>
         /// <param name="key">The key.</param>
         /// <returns><c>true</c> if a cache item exists, <c>false</c> otherwise.</returns>
-        public virtual async Task<bool> Contains(string key)
+        public virtual Task<bool> Contains(string key)
         {
-            return false;
+            return Task.FromResult(false);
         }
 
         /// <summary>
@@ -86,9 +88,18 @@
         /// <typeparam name="T">The item type.</typeparam>
         /// <param name="key">The key.</param>
         /// <returns>The cache item.</returns>
-        public virtual async Task<ICacheItem<T>> Get<T>(string key)
+        public virtual Task<ICacheItem<T>> Get<T>(string key)
         {
-            return CacheItem<T>.Empty(key);
+            return Task.FromResult(CacheItem<T>.Empty(key));
+        }
+
+        /// <summary>Gets the cache item with specified tags.</summary>
+        /// <typeparam name="T">Generic type parameter.</typeparam>
+        /// <param name="tags">The tags.</param>
+        /// <returns>The cache items.</returns>
+        public Task<IEnumerable<ICacheItem<T>>> GetByTag<T>(params string[] tags)
+        {
+            return Task.FromResult(Enumerable.Empty<ICacheItem<T>>());
         }
 
         /// <summary>
@@ -137,29 +148,27 @@
             return default(T);
         }
 
-        /// <summary>
-        /// Adds or updates a cache item with specified key and object.
-        /// </summary>
+        /// <summary>Adds or updates a cache item with specified key and object.</summary>
         /// <typeparam name="T">The item type.</typeparam>
         /// <param name="key">The key.</param>
         /// <param name="item">The item.</param>
+        /// <param name="tags">The tags.</param>
         /// <returns>A task.</returns>
-        public virtual async Task<T> AddOrUpdate<T>(string key, T item)
+        public virtual Task<T> AddOrUpdate<T>(string key, T item, params string[] tags)
         {
-            return item;
+            return this.AddOrUpdate(key, item, this.ExpireTime, tags);
         }
 
-        /// <summary>
-        /// Adds or updates a cache item with specified key and object.
-        /// </summary>
+        /// <summary>Adds or updates a cache item with specified key and object.</summary>
         /// <typeparam name="T">The item type.</typeparam>
         /// <param name="key">The key.</param>
         /// <param name="item">The item.</param>
         /// <param name="expires">The expire time.</param>
+        /// <param name="tags">The tags.</param>
         /// <returns>A task.</returns>
-        public virtual async Task<T> AddOrUpdate<T>(string key, T item, DateTimeOffset expires, params string[] tags)
+        public virtual Task<T> AddOrUpdate<T>(string key, T item, DateTimeOffset expires, params string[] tags)
         {
-            return item;
+            return Task.FromResult(item);
         }
 
         /// <summary>
@@ -167,9 +176,9 @@
         /// </summary>
         /// <param name="key">The key.</param>
         /// <returns><c>True</c> if successful, <c>false</c> otherwise.</returns>
-        public virtual async Task<bool> Remove(string key)
+        public virtual Task<bool> RemoveByKey(string key)
         {
-            return false;
+            return Task.FromResult(false);
         }
 
         /// <summary>
@@ -177,9 +186,9 @@
         /// </summary>
         /// <param name="pattern">The pattern.</param>
         /// <returns><c>True</c> if successful, <c>false</c> otherwise.</returns>
-        public virtual async Task<bool> RemoveAll(string pattern)
+        public virtual async Task<bool> RemoveByPattern(string pattern)
         {
-            return await this.RemoveAll(new Regex(pattern));
+            return await this.RemoveByPattern(new Regex(pattern));
         }
 
         /// <summary>
@@ -187,9 +196,9 @@
         /// </summary>
         /// <param name="tags">The tags.</param>
         /// <returns><c>True</c> if successful, <c>false</c> otherwise.</returns>
-        public virtual async Task<bool> RemoveTags(params string[] tags)
+        public virtual Task<bool> RemoveByTag(params string[] tags)
         {
-            return false;
+            return Task.FromResult(false);
         }
 
         /// <summary>
@@ -197,18 +206,18 @@
         /// </summary>
         /// <param name="regex">The regular expression.</param>
         /// <returns><c>True</c> if successful, <c>false</c> otherwise.</returns>
-        public virtual async Task<bool> RemoveAll(Regex regex)
+        public virtual Task<bool> RemoveByPattern(Regex regex)
         {
-            return false;
+            return Task.FromResult(false);
         }
 
         /// <summary>
         /// Purges all cache items.
         /// </summary>
         /// <returns><c>True</c> if successful, <c>false</c> otherwise.</returns>
-        public virtual async Task<bool> Purge()
+        public virtual Task<bool> Purge()
         {
-            return false;
+            return Task.FromResult(false);
         }
     }
 }

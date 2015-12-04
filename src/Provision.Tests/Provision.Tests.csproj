@@ -80,6 +80,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BaseCacheHandlerTests.cs" />
     <Compile Include="CacheItemTests.cs" />
     <Compile Include="Extensions\ObjectExtensions.cs" />
     <Compile Include="Models\ExpireableReport.cs" />

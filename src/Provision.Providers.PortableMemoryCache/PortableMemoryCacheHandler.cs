@@ -40,9 +40,8 @@
             this.cache = new ConcurrentDictionary<string, object>();
         }
 
-        /// <summary>
-        /// Creates a cache item key from the specified segments.
-        /// </summary>
+        /// <summary>Creates a cache item key from the specified segments.</summary>
+        /// <exception cref="ArgumentException">Thrown when one or more arguments have unsupported or illegal values.</exception>
         /// <param name="segments">The key segments.</param>
         /// <returns>A cache item key.</returns>
         public override string CreateKey(params object[] segments)
@@ -53,7 +52,7 @@
                 throw new ArgumentException("Cannot create key from null segments", nameof(segments));
             }
 
-            return string.Format("{0}", string.Join("_", segments));
+            return $"{string.Join(this.Configuration.Separator, segments)}";
         }
 
         /// <summary>
@@ -105,18 +104,6 @@
         }
 
         /// <summary>
-        /// Adds or updates a cache item with specified key and object.
-        /// </summary>
-        /// <typeparam name="T">The item type.</typeparam>
-        /// <param name="key">The key.</param>
-        /// <param name="item">The item.</param>
-        /// <returns>A task.</returns>
-        public override async Task<T> AddOrUpdate<T>(string key, T item)
-        {
-            return await this.AddOrUpdate(key, item, this.ExpireTime);
-        }
-
-        /// <summary>
         /// Sets a cache item with specified key and object.
         /// </summary>
         /// <typeparam name="T">The item type.</typeparam>
@@ -135,7 +122,7 @@
 
                     if (await this.Contains(key))
                     {
-                        await this.Remove(key);
+                        await this.RemoveByKey(key);
                     }
 
                     this.cache.TryAdd(key, cacheItem);
@@ -171,7 +158,7 @@
         /// </summary>
         /// <param name="key">The key.</param>
         /// <returns><c>True</c> if successful, <c>false</c> otherwise.</returns>
-        public override async Task<bool> Remove(string key)
+        public override async Task<bool> RemoveByKey(string key)
         {
             object existingValue;
 
@@ -183,7 +170,7 @@
         /// </summary>
         /// <param name="regex">The regular expression.</param>
         /// <returns><c>True</c> if successful, <c>false</c> otherwise.</returns>
-        public override async Task<bool> RemoveAll(Regex regex)
+        public override async Task<bool> RemoveByPattern(Regex regex)
         {
             try
             {
@@ -191,7 +178,7 @@
                 {
                     if (regex.Match(item.Key).Success)
                     {
-                        await this.Remove(item.Key);
+                        await this.RemoveByKey(item.Key);
                     }
                 }
 
@@ -207,7 +194,7 @@
         /// </summary>
         /// <param name="tags">The tags.</param>
         /// <returns><c>True</c> if successful, <c>false</c> otherwise.</returns>
-        public async override Task<bool> RemoveTags(params string[] tags)
+        public async override Task<bool> RemoveByTag(params string[] tags)
         {
             try
             {
@@ -215,7 +202,7 @@
                 {
                     foreach (var key in this.cacheTags[tag])
                     {
-                        var itemRemoved = await this.Remove(key);
+                        var itemRemoved = await this.RemoveByKey(key);
                         if (itemRemoved)
                         {
                             this.cacheTags[tag].Remove(key);

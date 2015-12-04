@@ -1,42 +1,26 @@
 ﻿namespace Provision.Config
 {
+    using Provision.Interfaces;
     using System;
     using System.Collections.Generic;
     using System.ComponentModel;
     using System.Configuration;
 
-    using Provision.Interfaces;
-
     public class CacheHandlerConfigurationElement : ConfigurationElement, ICacheHandlerConfiguration
     {
-        /// <summary>
-        /// The options
-        /// </summary>
+        /// <summary>The options.</summary>
         private readonly IDictionary<string, object> options;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CacheHandlerConfigurationElement"/> class.
-        /// </summary>
+        /// <summary>Initializes a new instance of the <see cref="CacheHandlerConfigurationElement"/> class.</summary>
         public CacheHandlerConfigurationElement()
         {
             this.options = new Dictionary<string, object>();
         }
 
-        /// <summary>
-        /// Gets the options.
-        /// </summary>
-        /// <value>The options.</value>
-        public IDictionary<string, object> Options
-        {
-            get
-            {
-                return this.options;
-            }
-        }
+        /// <summary>Gets the options.</summary>
+        public IDictionary<string, object> Options => this.options;
 
-        /// <summary>
-        /// Gets or sets the host.
-        /// </summary>
+        /// <summary>Gets or sets the host.</summary>
         /// <value>The host.</value>
         [ConfigurationProperty("name", IsKey = true, IsRequired = true)]
         public string Name
@@ -52,9 +36,38 @@
             }
         }
 
-        /// <summary>
-        /// Gets or sets the handler.
-        /// </summary>
+        /// <summary>Gets the cache key prefix.</summary>
+        /// <value>The cache key prefix.</value>
+        public string Prefix
+        {
+            get
+            {
+                return (string)base["prefix"];
+            }
+
+            set
+            {
+                base["prefix"] = value;
+            }
+        }
+
+        /// <summary>Gets the cache key segment separator.</summary>
+        /// <value>The cache key segment separator.</value>
+        public string Separator
+        {
+            get
+            {
+                return (string)base["separator"];
+            }
+
+            set
+            {
+                base["separator"] = value;
+            }
+        }
+
+        /// <summary>Gets or sets the handler.</summary>
+        /// <exception cref="ConfigurationErrorsException">Thrown when a Configuration Errors error condition occurs.</exception>
         /// <value>The handler.</value>
         [ConfigurationProperty("type", IsRequired = false)]
         [TypeConverter(typeof(TypeNameConverter))]
@@ -78,9 +91,7 @@
             }
         }
 
-        /// <summary>
-        /// Gets or sets the default expire time in CRON-format.
-        /// </summary>
+        /// <summary>Gets or sets the default expire time in CRON-format.</summary>
         /// <value>The default expire time.</value>
         [ConfigurationProperty("expireTime", IsRequired = false, DefaultValue = "0 0/1 * 1/1 * ? *")]
         public string ExpireTime
@@ -96,15 +107,14 @@
             }
         }
 
-        /// <summary>
-        /// Initializes the specified cache handler provider with the specified parameters.
-        /// </summary>
+        /// <summary>Initializes the specified cache handler provider with the specified parameters.</summary>
+        /// <exception cref="ArgumentNullException">Thrown when one or more required arguments are null.</exception>
         /// <param name="parameters">The parameters.</param>
         public void Initialize(IDictionary<string, object> parameters)
         {
             if (parameters == null)
             {
-                throw new ArgumentNullException("parameters");
+                throw new ArgumentNullException(nameof(parameters));
             }
 
             // Merge parameters with current options
@@ -121,9 +131,7 @@
             }
         }
 
-        /// <summary>
-        /// Gets the property value.
-        /// </summary>
+        /// <summary>Gets the property value.</summary>
         /// <typeparam name="T">The property value type.</typeparam>
         /// <param name="propertyName">Name of the property.</param>
         /// <returns>The property value.</returns>
@@ -139,9 +147,7 @@
             }
         }
 
-        /// <summary>
-        /// Gets a value indicating whether an unknown attribute is encountered during deserialization.
-        /// </summary>
+        /// <summary>Gets a value indicating whether an unknown attribute is encountered during deserialization.</summary>
         /// <param name="name">The name of the unrecognized attribute.</param>
         /// <param name="value">The value of the unrecognized attribute.</param>
         /// <returns>true when an unknown attribute is encountered while deserializing; otherwise, false.</returns>

@@ -12,7 +12,7 @@
         /// Initializes a new instance of the <see cref="RedisCacheHandlerConfiguration"/> class.
         /// </summary>
         public RedisCacheHandlerConfiguration()
-            : base("redis", typeof(RedisCacheHandler).GetTypeInfo())
+            : base("redis", typeof(RedisCacheHandler).GetTypeInfo(), ":", "")
         {
             this.Options["host"] = "localhost";
             this.Options["port"] = 6379;
@@ -34,13 +34,12 @@
         /// <param name="compress">if set to <c>true</c> [compress].</param>
         /// <param name="expireTime">The expire time.</param>
         public RedisCacheHandlerConfiguration(string host = "localhost", int port = 6379, int database = 0, string password = null, string prefix = null, int maxZipMapEntries = 512, string loggerName = null, bool compress = false, string expireTime = "0 0/1 * 1/1 * ? *")
-            : base("redis", typeof(RedisCacheHandler).GetTypeInfo())
+            : base("redis", typeof(RedisCacheHandler).GetTypeInfo(), ":", prefix)
         {
             this.Options["host"] = host;
             this.Options["port"] = port;
             this.Options["database"] = database;
             this.Options["password"] = password;
-            this.Options["prefix"] = prefix;
             this.Options["loggerName"] = loggerName;
             this.Options["compress"] = compress;
             this.Options["maxZipMapEntries"] = maxZipMapEntries;
@@ -51,97 +50,43 @@
         /// Gets the name of the logger.
         /// </summary>
         /// <value>The name of the logger.</value>
-        public string LoggerName
-        {
-            get
-            {
-                return this.GetPropertyValue<string>("loggerName");
-            }
-        }
+        public string LoggerName => this.GetPropertyValue<string>("loggerName");
 
         /// <summary>
         /// Gets the host where Redis is running.
         /// </summary>
         /// <value>The host.</value>
-        public string Host
-        {
-            get
-            {
-                return this.GetPropertyValue<string>("host");
-            }
-        }
+        public string Host => this.GetPropertyValue<string>("host");
 
         /// <summary>
         /// Gets the port.
         /// </summary>
         /// <value>The port.</value>
-        public int Port
-        {
-            get
-            {
-                return this.GetPropertyValue<int>("port");
-            }
-        }
+        public int Port => this.GetPropertyValue<int>("port");
 
         /// <summary>
         /// Gets the database.
         /// </summary>
         /// <value>The database.</value>
-        public int Database
-        {
-            get
-            {
-                return this.GetPropertyValue<int>("database");
-            }
-        }
+        public int Database => this.GetPropertyValue<int>("database");
 
         /// <summary>
         /// Gets the password.
         /// </summary>
         /// <value>The password.</value>
-        public string Password
-        {
-            get
-            {
-                return this.GetPropertyValue<string>("password");
-            }
-        }
-
-        /// <summary>
-        /// Gets the prefix.
-        /// </summary>
-        /// <value>The prefix.</value>
-        public string Prefix
-        {
-            get
-            {
-                return this.GetPropertyValue<string>("prefix");
-            }
-        }
+        public string Password => this.GetPropertyValue<string>("password");
 
         /// <summary>
         /// Gets a value indicating whether data should be compressed.
         /// </summary>
         /// <value><c>true</c> if data should be compressed; otherwise, <c>false</c>.</value>
-        public bool Compress
-        {
-            get
-            {
-                return this.GetPropertyValue<bool>("compress");
-            }
-        }
+        public bool Compress => this.GetPropertyValue<bool>("compress");
 
         /// <summary>
         /// Gets or sets the max number of zipmap entries.
         /// </summary>
         /// <value>The max number of zipmap entries.</value>
-        public int MaxZipMapEntries
-        {
-            get
-            {
-                return this.GetPropertyValue<int>("maxZipMapEntries");
-            }
-        }
+        public int MaxZipMapEntries => this.GetPropertyValue<int>("maxZipMapEntries");
 
         /// <summary>Gets the server connection.</summary>
         /// <value>The server connection.</value>

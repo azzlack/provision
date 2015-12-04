@@ -50,36 +50,25 @@
         /// <value>The value.</value>
         public T Value { get; private set; }
 
-        /// <summary>
-        /// Gets a value indicating whether this instance has value.
-        /// </summary>
-        /// <value><c>true</c> if this instance has value; otherwise, <c>false</c>.</value>
-        public bool HasValue
+        /// <summary>Creates an empty cache item with the specified key.</summary>
+        /// <param name="key">The key.</param>
+        /// <returns>The cache item.</returns>
+        public static ICacheItem<T> Empty(string key)
         {
-            get
-            {
-                return this.Value != null;
-            }
+            return new CacheItem<T>(key);
         }
 
-        /// <summary>
-        /// Initializes the specified value.
-        /// </summary>
+        /// <summary>Gets a value indicating whether this instance has value.</summary>
+        /// <value><c>true</c> if this instance has value; otherwise, <c>false</c>.</value>
+        public bool HasValue => this.Value != null;
+
+        /// <summary>Initializes the specified value.</summary>
         /// <param name="value">The value.</param>
         /// <param name="expires">The expires.</param>
         public void Initialize(T value, DateTime expires)
         {
             this.Value = value;
             this.Expires = expires;
-        }
-
-        /// <summary>
-        /// Creates an empty cache item with the specified key.
-        /// </summary>
-        /// <returns>The cache item.</returns>
-        public static CacheItem<T> Empty(string key)
-        {
-            return new CacheItem<T>(key);
         }
     }
 }
