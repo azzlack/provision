@@ -59,6 +59,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CacheHandlerConfigurationElement.cs" />
+    <Compile Include="IProvisionConfiguration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CacheHandlerConfigurationElementCollection.cs" />
     <Compile Include="ProvisionConfiguration.cs" />

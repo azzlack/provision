@@ -8,10 +8,6 @@
     /// </summary>
     public interface ICacheHandlerConfiguration
     {
-        /// <summary>Gets the name.</summary>
-        /// <value>The name.</value>
-        string Name { get; }
-
         /// <summary>Gets the cache key prefix.</summary>
         /// <value>The cache key prefix.</value>
         string Prefix { get; }

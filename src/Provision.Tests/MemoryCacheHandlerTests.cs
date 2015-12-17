@@ -19,7 +19,7 @@
         {
             var ch = new MemoryCacheHandler(new MemoryCacheHandlerConfiguration("0 0 0/1 1/1 * ? *"));
 
-            Assert.AreEqual("mem", ch.Configuration.Name);
+            Assert.AreEqual(typeof(MemoryCacheHandler), ch.Configuration.Type);
             Assert.AreEqual("0 0 0/1 1/1 * ? *", ch.Configuration.ExpireTime);
 
             var key = ch.CreateKey("whale", "fail");

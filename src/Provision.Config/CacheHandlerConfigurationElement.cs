@@ -20,22 +20,6 @@
         /// <summary>Gets the options.</summary>
         public IDictionary<string, object> Options => this.options;
 
-        /// <summary>Gets or sets the host.</summary>
-        /// <value>The host.</value>
-        [ConfigurationProperty("name", IsKey = true, IsRequired = true)]
-        public string Name
-        {
-            get
-            {
-                return (string)base["name"];
-            }
-
-            set
-            {
-                base["name"] = value;
-            }
-        }
-
         /// <summary>Gets the cache key prefix.</summary>
         /// <value>The cache key prefix.</value>
         public string Prefix

@@ -1,55 +1,44 @@
 ﻿namespace Provision.Config
 {
+    using Provision.Interfaces;
     using System;
     using System.Configuration;
 
-    using Provision.Interfaces;
-
     public class CacheHandlerConfigurationElementCollection : ConfigurationElementCollection
     {
-        /// <summary>
-        /// Gets the cache handler configuration with the specified name.
-        /// </summary>
-        /// <param name="name">The name.</param>
+        /// <summary>The cache handler configuration.</summary>
+        private ICacheHandlerConfiguration cacheHandlerConfiguration;
+
+        /// <summary>Gets the cache handler configuration with the specified name.</summary>
+        /// <exception cref="ArgumentException">Thrown when one or more arguments have unsupported or illegal values.</exception>
         /// <returns>The cache handler configuration.</returns>
-        public ICacheHandlerConfiguration Get(string name)
+        public ICacheHandlerConfiguration Get()
         {
-            // Return default configuration if no name was specified
-            if (string.IsNullOrEmpty(name))
+            if (this.cacheHandlerConfiguration == null)
             {
-                return new CacheHandlerConfigurationElement();
+                // Get configuration element
+                var e = this.BaseGet(0) as CacheHandlerConfigurationElement;
+
+                if (e == null)
+                {
+                    throw new ArgumentException("No valid cache handler configuration exist");
+                }
+
+                // If type has not been specified, just return the configuration
+                if (e.Type == null)
+                {
+                    this.cacheHandlerConfiguration = e;
+                }
+                else
+                {
+                    var p = (ICacheHandlerConfiguration)Activator.CreateInstance(e.Type);
+                    p.Initialize(e.Options);
+
+                    this.cacheHandlerConfiguration = p;
+                }
             }
 
-            // Get configuration element
-            var e = this.BaseGet(name) as CacheHandlerConfigurationElement;
-
-            if (e == null)
-            {
-                throw new ArgumentException("No provider with the specified name exist");
-            }
-
-            // If type has not been specified, just return the configuration
-            if (e.Type == null)
-            {
-                return e;
-            }
-
-            var p = (ICacheHandlerConfiguration)Activator.CreateInstance(e.Type);
-            p.Initialize(e.Options);
-
-            return p;
-        }
-
-        /// <summary>
-        /// Gets the cache handler configuration with the specified name.
-        /// </summary>
-        /// <typeparam name="T">The cache handler configuration type</typeparam>
-        /// <param name="name">The name.</param>
-        /// <returns>The cache handler configuration.</returns>
-        /// <exception cref="System.ArgumentException">No provider with the specified name exist</exception>
-        public T Get<T>(string name) where T : class, ICacheHandlerConfiguration
-        {
-            return this.Get(name) as T;
+            return this.cacheHandlerConfiguration;
         }
 
         /// <summary>
@@ -72,7 +61,7 @@
         /// <param name="element">The <see cref="T:System.Configuration.ConfigurationElement"/> to return the key for. </param>
         protected override object GetElementKey(ConfigurationElement element)
         {
-            return ((CacheHandlerConfigurationElement)element).Name;
+            return ((CacheHandlerConfigurationElement)element).Type;
         }
     }
 }

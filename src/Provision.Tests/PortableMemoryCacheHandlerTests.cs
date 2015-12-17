@@ -18,7 +18,7 @@
         {
             var ch = new PortableMemoryCacheHandler(new PortableMemoryCacheHandlerConfiguration("0 0 0/1 1/1 * ? *"));
 
-            Assert.AreEqual("pclmem", ch.Configuration.Name);
+            Assert.AreEqual(typeof(PortableMemoryCacheHandler), ch.Configuration.Type);
             Assert.AreEqual("0 0 0/1 1/1 * ? *", ch.Configuration.ExpireTime);
 
             var key = ch.CreateKey("whale", "fail");
