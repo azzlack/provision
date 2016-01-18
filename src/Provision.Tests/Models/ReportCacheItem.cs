@@ -1,8 +1,7 @@
 ﻿namespace Provision.Tests.Models
 {
-    using System;
-
     using Provision.Interfaces;
+    using System;
 
     public class ReportCacheItem : ICacheItem<Report>
     {
@@ -28,6 +27,10 @@
                 return this.report;
             }
         }
+
+        /// <summary>Gets the raw value.</summary>
+        /// <value>The raw value.</value>
+        public object RawValue { get; }
 
         /// <summary>
         /// Gets a value indicating whether this instance has value.

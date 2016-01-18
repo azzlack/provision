@@ -30,6 +30,20 @@
             this.Key = key;
             this.Expires = expires;
             this.Value = item;
+            this.RawValue = item;
+        }
+
+        /// <summary>Initializes a new instance of the <see cref="CacheItem{T}" /> class.</summary>
+        /// <param name="key">The key.</param>
+        /// <param name="item">The item.</param>
+        /// <param name="raw">The raw.</param>
+        /// <param name="expires">The expire time.</param>
+        public CacheItem(string key, T item, object raw, DateTimeOffset expires)
+        {
+            this.Key = key;
+            this.Expires = expires;
+            this.Value = item;
+            this.RawValue = raw;
         }
 
         /// <summary>
@@ -50,6 +64,10 @@
         /// <value>The value.</value>
         public T Value { get; private set; }
 
+        /// <summary>Gets the raw value.</summary>
+        /// <value>The raw value.</value>
+        public object RawValue { get; private set; }
+
         /// <summary>Creates an empty cache item with the specified key.</summary>
         /// <param name="key">The key.</param>
         /// <returns>The cache item.</returns>
@@ -68,6 +86,7 @@
         public void Initialize(T value, DateTimeOffset expires)
         {
             this.Value = value;
+            this.RawValue = value;
             this.Expires = expires;
         }
     }

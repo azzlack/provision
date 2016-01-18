@@ -96,7 +96,7 @@
 
         [TestCase("report", "report2")]
         [TestCase("report#", "report2#")]
-        public async void RemoveSpesificTag_WhenGivenValidTag_ShouldRemoveSpesificData(string k1, string k2)
+        public async void RemoveSpecificTag_WhenGivenValidTag_ShouldRemoveSpecificData(string k1, string k2)
         {
             var d = new Report()
             {
@@ -166,6 +166,26 @@
             Assert.AreEqual(obj1.Key, obj2.Key, "The item added to the cache is not the same as was sent in");
             Assert.AreEqual(update.Key, obj3.Key, "The item updated in the cache is not the same as was sent in");
             Assert.AreNotEqual(obj2.Key, update.Key, "The item updated in the cache has mutated the earlier object");
+        }
+
+        [Test]
+        public async void GetRaw_WhenGettingTwice_ShouldReturnSameData()
+        {
+            var d = new Report() { Rating = 4.00m };
+
+            var key = this.CacheHandler.CreateKey<Report>("report", "Get_WhenGettingTwice_ShouldReturnSameData");
+
+            await this.CacheHandler.AddOrUpdate(key, d, DateTimeOffset.UtcNow.AddMinutes(10));
+
+            var r1 = await this.CacheHandler.Get<Report>(key);
+            var r2 = await this.CacheHandler.Get<Report>(key);
+
+            Console.WriteLine(r1.RawValue);
+            Console.WriteLine(r2.RawValue);
+
+            Assert.AreEqual(r1.RawValue.ToString(), r2.RawValue.ToString());
+            Assert.AreEqual(d.Rating, r1.Value.Rating);
+            Assert.AreEqual(d.Rating, r2.Value.Rating);
         }
 
         [TestCase("report", "k54")]

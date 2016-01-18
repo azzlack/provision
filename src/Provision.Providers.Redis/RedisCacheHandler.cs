@@ -215,17 +215,21 @@
                     }
 
                     // Convert data to typed result
+                    var raw = data;
                     T result;
 
                     // If compression is specified, decompress result
                     if (this.configuration.Compress)
                     {
                         var serializer = SerializationContext.Default.GetSerializer<T>();
+
                         result = serializer.UnpackSingleObject(data);
                     }
                     else
                     {
-                        result = JsonConvert.DeserializeObject<T>(Encoding.UTF8.GetString(data));
+                        var json = Encoding.UTF8.GetString(data);
+
+                        result = JsonConvert.DeserializeObject<T>(json);
                     }
 
                     if (result == null)
@@ -237,7 +241,7 @@
                         this.log.DebugFormat("Retrieved cache item with key '{0}' and type '{1}'. It expires at {2}", key, typeof(T), expires);
                         this.log.InfoFormat("RedisCacheHandler.GetCacheItem<{2}>({1}) Time: {0}s", DateTimeOffset.UtcNow.Subtract(start).TotalSeconds, key, typeof(T));
 
-                        var ci = new CacheItem<T>(key, result, expires);
+                        var ci = new CacheItem<T>(key, result, raw, expires);
                         ci.MergeExpire();
 
                         return ci;
@@ -391,7 +395,7 @@
 
                     if (!removed)
                     {
-                        throw new ArgumentException($"Error when removing key '{key}' to database");
+                        throw new ArgumentException($"Error when removing key '{key}' from database");
                     }
                 }
                 catch (Exception ex)
