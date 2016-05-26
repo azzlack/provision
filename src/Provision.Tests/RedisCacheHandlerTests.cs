@@ -1,4 +1,6 @@
-﻿namespace Provision.Tests
+﻿using Provision.Models;
+
+namespace Provision.Tests
 {
     using NUnit.Framework;
     using Provision.Providers.Redis;
@@ -7,7 +9,7 @@
     {
         public override void SetUp()
         {
-            this.CacheHandler = new RedisCacheHandler(new RedisCacheHandlerConfiguration("localhost", 6379, 3, null, "provision", 512, null, true));
+            this.CacheHandlers = new CacheHandlerCollection() { new RedisCacheHandler(new RedisCacheHandlerConfiguration("localhost", 6379, 3, null, "provision", 512, null, true)) };
 
             base.SetUp();
         }
@@ -23,7 +25,7 @@
         [Test]
         public void Compress_WhenSetToTrue_ShouldReturnTrue()
         {
-            Assert.IsTrue(((RedisCacheHandlerConfiguration)this.CacheHandler.Configuration).Compress);
+            Assert.IsTrue(((RedisCacheHandlerConfiguration)this.CacheHandlers[0].Configuration).Compress);
         }
     }
 }

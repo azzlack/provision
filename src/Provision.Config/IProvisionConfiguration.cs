@@ -1,22 +1,24 @@
-﻿namespace Provision.Config
+﻿using System.Collections.Generic;
+
+namespace Provision.Config
 {
     using Provision.Interfaces;
 
     public interface IProvisionConfiguration
     {
         /// <summary>
-        /// Gets the cache handler.
+        /// Gets the cache handlers.
         /// </summary>
         /// <returns>The cache handler.</returns>
-        ICacheHandler GetHandler();
+        ICacheHandlerCollection GetHandlers();
 
         /// <summary>Gets the cache handler.</summary>
         /// <param name="configuration">The configuration.</param>
         /// <returns>The cache handler.</returns>
-        ICacheHandler GetHandler(ICacheHandlerConfiguration configuration);
+        ICacheHandlerCollection GetHandlers(IList<ICacheHandlerConfiguration> configuration);
 
         /// <summary>Gets the configuration.</summary>
         /// <returns>The configuration.</returns>
-        ICacheHandlerConfiguration GetConfiguration();
+        IList<ICacheHandlerConfiguration> GetCacheHandlerConfigurations();
     }
 }

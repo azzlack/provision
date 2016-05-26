@@ -1,4 +1,7 @@
-﻿namespace Provision.Config
+﻿using System.Collections.Generic;
+using System.Linq;
+
+namespace Provision.Config
 {
     using Provision.Interfaces;
     using System;
@@ -7,35 +10,43 @@
     public class CacheHandlerConfigurationElementCollection : ConfigurationElementCollection
     {
         /// <summary>The cache handler configuration.</summary>
-        private ICacheHandlerConfiguration cacheHandlerConfiguration;
+        private readonly IList<ICacheHandlerConfiguration> cacheHandlerConfiguration;
 
-        /// <summary>Gets the cache handler configuration with the specified name.</summary>
-        /// <exception cref="ArgumentException">Thrown when one or more arguments have unsupported or illegal values.</exception>
-        /// <returns>The cache handler configuration.</returns>
-        public ICacheHandlerConfiguration Get()
+        public CacheHandlerConfigurationElementCollection()
         {
-            if (this.cacheHandlerConfiguration == null)
+            this.cacheHandlerConfiguration = new List<ICacheHandlerConfiguration>();
+        }
+
+        /// <summary>Gets the cache handler configurations with the specified name.</summary>
+        /// <exception cref="ArgumentException">Thrown when one or more arguments have unsupported or illegal values.</exception>
+        /// <returns>The cache handler configurations.</returns>
+        public IList<ICacheHandlerConfiguration> GetConfigurations()
+        {
+            if (this.Count == 0)
             {
-                // Get configuration element
-                var e = this.BaseGet(0) as CacheHandlerConfigurationElement;
+                throw new ArgumentException("No valid cache handler configuration exist");
+            }
+
+            for (var i = 0; i < this.Count; i++)
+            {
+                var c = this.BaseGet(i);
+                var e = c as CacheHandlerConfigurationElement;
 
                 if (e == null)
                 {
-                    throw new ArgumentException("No valid cache handler configuration exist");
+                    throw new ArgumentException("Invalid configuration for one or more cache handlers");
                 }
 
-                // If type has not been specified, just return the configuration
+                // If type has not been specified, throw error
                 if (e.Type == null)
                 {
-                    this.cacheHandlerConfiguration = e;
+                    throw new ArgumentException("Invalid configuration for one or more cache handlers");
                 }
-                else
-                {
-                    var p = (ICacheHandlerConfiguration)Activator.CreateInstance(e.Type);
-                    p.Initialize(e.Options);
 
-                    this.cacheHandlerConfiguration = p;
-                }
+                var p = (ICacheHandlerConfiguration)Activator.CreateInstance(e.Type);
+                p.Initialize(e.Options);
+
+                this.cacheHandlerConfiguration.Add(p);
             }
 
             return this.cacheHandlerConfiguration;

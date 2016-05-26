@@ -8,6 +8,10 @@
     /// </summary>
     public interface ICacheHandlerConfiguration
     {
+        /// <summary>Gets the name.</summary>
+        /// <value>The name.</value>
+        string Name { get; }
+
         /// <summary>Gets the cache key prefix.</summary>
         /// <value>The cache key prefix.</value>
         string Prefix { get; }
@@ -30,7 +34,7 @@
         /// <value>The options.</value>
         IDictionary<string, object> Options { get; }
 
-        /// <summary>Initializes the specified cache handler provider with the specified parameters.</summary>
+        /// <summary>Initializes the specified cache handler configuration with the specified parameters.</summary>
         /// <param name="parameters">The parameters.</param>
         void Initialize(IDictionary<string, object> parameters);
 

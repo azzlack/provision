@@ -418,61 +418,6 @@
             return removed;
         }
 
-        /// <summary>
-        /// Removes all cache items matching the specified pattern.
-        /// </summary>
-        /// <param name="pattern">The pattern.</param>
-        /// <returns><c>True</c> if successful, <c>false</c> otherwise.</returns>
-        public override async Task<bool> RemoveByPattern(string pattern)
-        {
-            var start = DateTimeOffset.UtcNow;
-
-            var removed = false;
-
-            this.log.DebugFormat("Removing cache items matching pattern '{0}'", pattern);
-
-            try
-            {
-                var db = this.configuration.Connection.GetDatabase();
-
-                try
-                {
-                    var keys = db.SortedSetScan(this.configuration.IndexKey, pattern);
-
-                    await db.KeyDeleteAsync(keys.Select(x => (RedisKey)x.Element.ToString()).ToArray());
-
-                    removed = true;
-                }
-                catch (Exception ex)
-                {
-                    this.log.Error(ex);
-                }
-            }
-            catch (Exception ex)
-            {
-                this.log.Error("Error when connecting to database", ex);
-            }
-
-            this.log.DebugFormat("Successfully removed cache items matching pattern '{0}'", pattern);
-
-            this.log.InfoFormat(
-                "RedisCacheHandler.RemoveByPattern({1}) Time: {0}s",
-                DateTimeOffset.UtcNow.Subtract(start).TotalSeconds,
-                pattern);
-
-            return removed;
-        }
-
-        /// <summary>
-        /// Removes all cache items matching the specified regular expression.
-        /// </summary>
-        /// <param name="regex">The regular expression.</param>
-        /// <returns><c>True</c> if successful, <c>false</c> otherwise.</returns>
-        public override Task<bool> RemoveByPattern(Regex regex)
-        {
-            throw new NotSupportedException("Redis does not support regular expression matching");
-        }
-
         /// <summary>Removes all cache items matching the specified tags.</summary>
         /// <param name="tags">The tags.</param>
         /// <returns><c>True</c> if successful, <c>false</c> otherwise.</returns>

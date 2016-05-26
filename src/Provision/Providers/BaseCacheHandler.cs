@@ -182,31 +182,11 @@
         }
 
         /// <summary>
-        /// Removes all cache items matching the specified pattern.
-        /// </summary>
-        /// <param name="pattern">The pattern.</param>
-        /// <returns><c>True</c> if successful, <c>false</c> otherwise.</returns>
-        public virtual async Task<bool> RemoveByPattern(string pattern)
-        {
-            return await this.RemoveByPattern(new Regex(pattern));
-        }
-
-        /// <summary>
         /// Removes all cache items matching the specified tags.
         /// </summary>
         /// <param name="tags">The tags.</param>
         /// <returns><c>True</c> if successful, <c>false</c> otherwise.</returns>
         public virtual Task<bool> RemoveByTag(params string[] tags)
-        {
-            return Task.FromResult(false);
-        }
-
-        /// <summary>
-        /// Removes all cache items matching the specified regular expression.
-        /// </summary>
-        /// <param name="regex">The regular expression.</param>
-        /// <returns><c>True</c> if successful, <c>false</c> otherwise.</returns>
-        public virtual Task<bool> RemoveByPattern(Regex regex)
         {
             return Task.FromResult(false);
         }

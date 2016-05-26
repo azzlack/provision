@@ -20,6 +20,19 @@
         /// <summary>Gets the options.</summary>
         public IDictionary<string, object> Options => this.options;
 
+        public string Name
+        {
+            get
+            {
+                return (string)base["name"];
+            }
+
+            set
+            {
+                base["name"] = value;
+            }
+        }
+
         /// <summary>Gets the cache key prefix.</summary>
         /// <value>The cache key prefix.</value>
         public string Prefix
@@ -66,7 +79,7 @@
                     return v;
                 }
 
-                throw new ConfigurationErrorsException("No valid ICacheHandler specified.");
+                throw new ConfigurationErrorsException("No valid ICacheHandlerConfiguration specified.");
             }
 
             set

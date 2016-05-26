@@ -166,35 +166,11 @@
         }
 
         /// <summary>
-        /// Removes all cache items matching the specified regular expression.
-        /// </summary>
-        /// <param name="regex">The regular expression.</param>
-        /// <returns><c>True</c> if successful, <c>false</c> otherwise.</returns>
-        public override async Task<bool> RemoveByPattern(Regex regex)
-        {
-            try
-            {
-                foreach (var item in cache)
-                {
-                    if (regex.Match(item.Key).Success)
-                    {
-                        await this.RemoveByKey(item.Key);
-                    }
-                }
-
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
-        /// <summary>
         /// Removes all cache items matching the specified tags.
         /// </summary>
         /// <param name="tags">The tags.</param>
         /// <returns><c>True</c> if successful, <c>false</c> otherwise.</returns>
-        public async override Task<bool> RemoveByTag(params string[] tags)
+        public override async Task<bool> RemoveByTag(params string[] tags)
         {
             try
             {

@@ -1,4 +1,9 @@
-﻿namespace Provision.Config
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using Provision.Models;
+
+namespace Provision.Config
 {
     using Provision.Interfaces;
     using System;
@@ -8,7 +13,7 @@
     public class ProvisionConfiguration : ConfigurationSection, IProvisionConfiguration
     {
         /// <summary>The cache handler.</summary>
-        private ICacheHandler cacheHandler;
+        private readonly ICacheHandlerCollection cacheHandlers;
 
         /// <summary>
         /// The settings
@@ -18,6 +23,7 @@
         /// <summary>Prevents a default instance of the <see cref="ProvisionConfiguration" /> class from being created.</summary>
         private ProvisionConfiguration()
         {
+            this.cacheHandlers = new CacheHandlerCollection();
         }
 
         /// <summary>
@@ -25,32 +31,6 @@
         /// </summary>
         /// <value>The settings.</value>
         public static IProvisionConfiguration Current => Instance.Value;
-
-        /// <summary>
-        /// Gets or sets the handler.
-        /// </summary>
-        /// <value>The handler.</value>
-        [ConfigurationProperty("handler", IsRequired = true)]
-        [TypeConverter(typeof(TypeNameConverter))]
-        public Type Handler
-        {
-            get
-            {
-                var v = this["handler"] as Type;
-
-                if (v != null && v.IsClass && typeof(ICacheHandler).IsAssignableFrom(v))
-                {
-                    return v;
-                }
-
-                throw new ConfigurationErrorsException("No valid ICacheHandler specified.");
-            }
-
-            set
-            {
-                this["handler"] = value;
-            }
-        }
 
         /// <summary>
         /// Gets or sets the cache handler configurations.
@@ -74,31 +54,33 @@
         /// Gets the cache handler.
         /// </summary>
         /// <returns>The cache handler.</returns>
-        public ICacheHandler GetHandler()
+        public ICacheHandlerCollection GetHandlers()
         {
-            var c = this.GetConfiguration();
+            var c = this.GetCacheHandlerConfigurations();
 
-            return this.GetHandler(c);
+            return this.GetHandlers(c);
         }
 
         /// <summary>Gets the cache handler.</summary>
         /// <param name="configuration">The configuration.</param>
         /// <returns>The cache handler.</returns>
-        public ICacheHandler GetHandler(ICacheHandlerConfiguration configuration)
+        public ICacheHandlerCollection GetHandlers(IList<ICacheHandlerConfiguration> configuration)
         {
-            if (this.cacheHandler == null)
+            foreach (var cacheHandlerConfiguration in configuration)
             {
-                this.cacheHandler = Activator.CreateInstance(this.Handler, configuration) as ICacheHandler;
+                var handler = Activator.CreateInstance(cacheHandlerConfiguration.Type, cacheHandlerConfiguration) as ICacheHandler;
+
+                this.cacheHandlers.Add(handler);
             }
 
-            return this.cacheHandler;
+            return this.cacheHandlers;
         }
 
         /// <summary>Gets the configuration.</summary>
         /// <returns>The configuration.</returns>
-        public ICacheHandlerConfiguration GetConfiguration()
+        public IList<ICacheHandlerConfiguration> GetCacheHandlerConfigurations()
         {
-            return this.Providers.Get();
+            return this.Providers.GetConfigurations();
         }
     }
 }

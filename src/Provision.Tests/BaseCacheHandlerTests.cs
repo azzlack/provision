@@ -11,7 +11,7 @@
     [TestFixture]
     public abstract class BaseCacheHandlerTests
     {
-        public ICacheHandler CacheHandler { get; set; }
+        public ICacheHandlerCollection CacheHandlers { get; set; }
 
         public string Prefix { get; private set; }
 
@@ -20,14 +20,14 @@
         [SetUp]
         public virtual void SetUp()
         {
-            this.Prefix = !string.IsNullOrEmpty(this.CacheHandler.Configuration.Prefix) ? (this.CacheHandler.Configuration.Prefix + this.CacheHandler.Configuration.Separator) : "";
-            this.Separator = this.CacheHandler.Configuration.Separator;
+            this.Prefix = "";
+            this.Separator = "_";
         }
 
         [Test]
         public async void CreateKey_WhenGivenValidType_ShouldCreateValidKey()
         {
-            var key = this.CacheHandler.CreateKey<Report>("reports", "something", "k4", "2014");
+            var key = this.CacheHandlers.CreateKey<Report>("reports", "something", "k4", "2014");
 
             Assert.AreEqual($"{this.Prefix}reports{this.Separator}something{this.Separator}k4{this.Separator}2014", key);
         }
@@ -43,11 +43,11 @@
                             }
             };
 
-            var key = this.CacheHandler.CreateKey<Report>("report", "k4");
+            var key = this.CacheHandlers.CreateKey<Report>("report", "k4");
 
-            await this.CacheHandler.AddOrUpdate(key, d, DateTimeOffset.UtcNow.AddDays(1));
+            await this.CacheHandlers.AddOrUpdate(key, d, DateTimeOffset.UtcNow.AddDays(1));
 
-            var r = await this.CacheHandler.Contains(key);
+            var r = await this.CacheHandlers.Contains(key);
 
             Assert.IsTrue(r);
         }
@@ -63,11 +63,11 @@
                             }
             };
 
-            var key = this.CacheHandler.CreateKey<Report>("report", "k4");
+            var key = this.CacheHandlers.CreateKey<Report>("report", "k4");
 
-            await this.CacheHandler.AddOrUpdate(key, d, DateTimeOffset.UtcNow.AddDays(1), "report");
+            await this.CacheHandlers.AddOrUpdate(key, d, DateTimeOffset.UtcNow.AddDays(1), "report");
 
-            var r = await this.CacheHandler.Contains(key);
+            var r = await this.CacheHandlers.Contains(key);
 
             Assert.IsTrue(r);
         }
@@ -83,13 +83,13 @@
                             }
             };
 
-            var key = this.CacheHandler.CreateKey<Report>("report", "k4");
+            var key = this.CacheHandlers.CreateKey<Report>("report", "k4");
 
-            await this.CacheHandler.AddOrUpdate(key, d, DateTimeOffset.UtcNow.AddDays(1), "report");
+            await this.CacheHandlers.AddOrUpdate(key, d, DateTimeOffset.UtcNow.AddDays(1), "report");
 
-            await this.CacheHandler.RemoveByTag("report");
+            await this.CacheHandlers.RemoveByTag("report");
 
-            var r = await this.CacheHandler.Contains(key);
+            var r = await this.CacheHandlers.Contains(key);
 
             Assert.IsFalse(r);
         }
@@ -106,9 +106,9 @@
                             }
             };
 
-            var key1 = this.CacheHandler.CreateKey<Report>(k1, "k4");
+            var key1 = this.CacheHandlers.CreateKey<Report>(k1, "k4");
 
-            await this.CacheHandler.AddOrUpdate(key1, d, DateTimeOffset.UtcNow.AddDays(1), "tag1");
+            await this.CacheHandlers.AddOrUpdate(key1, d, DateTimeOffset.UtcNow.AddDays(1), "tag1");
 
             var d2 = new Report()
             {
@@ -118,14 +118,14 @@
                             }
             };
 
-            var key2 = this.CacheHandler.CreateKey<Report>(k2, "k4");
+            var key2 = this.CacheHandlers.CreateKey<Report>(k2, "k4");
 
-            await this.CacheHandler.AddOrUpdate(key2, d2, DateTimeOffset.UtcNow.AddDays(1), "tag2");
+            await this.CacheHandlers.AddOrUpdate(key2, d2, DateTimeOffset.UtcNow.AddDays(1), "tag2");
 
-            await this.CacheHandler.RemoveByTag("tag1");
+            await this.CacheHandlers.RemoveByTag("tag1");
 
-            var r = await this.CacheHandler.Contains(key1);
-            var r2 = await this.CacheHandler.Contains(key2);
+            var r = await this.CacheHandlers.Contains(key1);
+            var r2 = await this.CacheHandlers.Contains(key2);
 
             Assert.IsFalse(r);
             Assert.IsTrue(r2);
@@ -137,11 +137,11 @@
         {
             var d = new Report();
 
-            var key = this.CacheHandler.CreateKey<Report>(segments);
+            var key = this.CacheHandlers.CreateKey<Report>(segments);
 
-            await this.CacheHandler.AddOrUpdate(key, d);
+            await this.CacheHandlers.AddOrUpdate(key, d);
 
-            var r = await this.CacheHandler.Contains(key);
+            var r = await this.CacheHandlers.Contains(key);
 
             Assert.IsTrue(r);
         }
@@ -152,16 +152,16 @@
         {
             var d = new ReportItem() { Key = "Test1" };
 
-            var key = this.CacheHandler.CreateKey<Report>(segments);
+            var key = this.CacheHandlers.CreateKey<Report>(segments);
 
-            var obj1 = await this.CacheHandler.AddOrUpdate(key, d);
+            var obj1 = await this.CacheHandlers.AddOrUpdate(key, d);
 
-            var obj2 = await this.CacheHandler.GetValue<ReportItem>(key);
+            var obj2 = await this.CacheHandlers.GetValue<ReportItem>(key);
 
             var update = obj2.Clone();
             update.Key = "Test2";
 
-            var obj3 = await this.CacheHandler.AddOrUpdate(key, update);
+            var obj3 = await this.CacheHandlers.AddOrUpdate(key, update);
 
             Assert.AreEqual(obj1.Key, obj2.Key, "The item added to the cache is not the same as was sent in");
             Assert.AreEqual(update.Key, obj3.Key, "The item updated in the cache is not the same as was sent in");
@@ -173,12 +173,12 @@
         {
             var d = new Report() { Rating = 4.00m };
 
-            var key = this.CacheHandler.CreateKey<Report>("report", "Get_WhenGettingTwice_ShouldReturnSameData");
+            var key = this.CacheHandlers.CreateKey<Report>("report", "Get_WhenGettingTwice_ShouldReturnSameData");
 
-            await this.CacheHandler.AddOrUpdate(key, d, DateTimeOffset.UtcNow.AddMinutes(10));
+            await this.CacheHandlers.AddOrUpdate(key, d, DateTimeOffset.UtcNow.AddMinutes(10));
 
-            var r1 = await this.CacheHandler.Get<Report>(key);
-            var r2 = await this.CacheHandler.Get<Report>(key);
+            var r1 = await this.CacheHandlers.Get<Report>(key);
+            var r2 = await this.CacheHandlers.Get<Report>(key);
 
             Console.WriteLine(r1.RawValue);
             Console.WriteLine(r2.RawValue);
@@ -200,11 +200,11 @@
                             }
             };
 
-            var key = this.CacheHandler.CreateKey<Report>(segments);
+            var key = this.CacheHandlers.CreateKey<Report>(segments);
 
-            await this.CacheHandler.AddOrUpdate(key, d, DateTimeOffset.UtcNow.AddDays(1));
+            await this.CacheHandlers.AddOrUpdate(key, d, DateTimeOffset.UtcNow.AddDays(1));
 
-            var r = await this.CacheHandler.GetValue<Report>(key);
+            var r = await this.CacheHandlers.GetValue<Report>(key);
 
             Assert.IsNotNull(r);
             Assert.IsNotNull(r.Items);
@@ -223,11 +223,11 @@
                             }
             };
 
-            var key = this.CacheHandler.CreateKey<Report>(segments);
+            var key = this.CacheHandlers.CreateKey<Report>(segments);
 
-            await this.CacheHandler.AddOrUpdate(key, d, DateTimeOffset.UtcNow.AddDays(-1));
+            await this.CacheHandlers.AddOrUpdate(key, d, DateTimeOffset.UtcNow.AddDays(-1));
 
-            var r = await this.CacheHandler.Get<Report>(key);
+            var r = await this.CacheHandlers.Get<Report>(key);
 
             Assert.IsFalse(r.HasValue);
             Assert.IsNull(r.Value);
@@ -237,8 +237,8 @@
         [TestCase("reports#", "k445697894231,3")]
         public async void Get_WhenGivenNonExistingKey_ShouldReturnNull(params string[] segments)
         {
-            var k = this.CacheHandler.CreateKey(segments);
-            var r = await this.CacheHandler.GetValue<Report>(k);
+            var k = this.CacheHandlers.CreateKey(segments);
+            var r = await this.CacheHandlers.GetValue<Report>(k);
 
             Assert.IsNull(r);
         }
@@ -249,65 +249,15 @@
         {
             var d = new Report();
 
-            var key = this.CacheHandler.CreateKey<Report>(segments);
+            var key = this.CacheHandlers.CreateKey<Report>(segments);
 
-            await this.CacheHandler.AddOrUpdate(key, d);
+            await this.CacheHandlers.AddOrUpdate(key, d);
 
-            await this.CacheHandler.RemoveByKey(key);
+            await this.CacheHandlers.RemoveByKey(key);
 
-            var exists = await this.CacheHandler.Contains(key);
+            var exists = await this.CacheHandlers.Contains(key);
 
             Assert.IsFalse(exists);
-        }
-
-        [Test]
-        public async void Remove_WhenGivenValidPattern_ShouldRemoveData()
-        {
-            var d = new Report();
-
-            var key1 = this.CacheHandler.CreateKey<Report>("reports", "love", "ks", "2013");
-            await this.CacheHandler.AddOrUpdate(key1, d, DateTimeOffset.UtcNow.AddMinutes(1));
-
-            var key2 = this.CacheHandler.CreateKey<Report>("reports", "love", "ks", "2014");
-            await this.CacheHandler.AddOrUpdate(key2, d, DateTimeOffset.UtcNow.AddMinutes(1));
-
-            var key3 = this.CacheHandler.CreateKey<Report>("letter", "love", "ks", "2014");
-            await this.CacheHandler.AddOrUpdate(key3, d, DateTimeOffset.UtcNow.AddMinutes(1));
-
-            await this.CacheHandler.RemoveByPattern($"{this.Prefix}reports{this.Separator}love{this.Separator}ks{this.Separator}*");
-
-            var exists1 = await this.CacheHandler.Contains(key1);
-            var exists2 = await this.CacheHandler.Contains(key2);
-            var exists3 = await this.CacheHandler.Contains(key3);
-
-            Assert.IsFalse(exists1);
-            Assert.IsFalse(exists2);
-            Assert.IsTrue(exists3);
-        }
-
-        [Test]
-        public async void Remove_WhenGivenValidRegex_ShouldRemoveData()
-        {
-            var d = new Report();
-
-            var key1 = this.CacheHandler.CreateKey<Report>("reports", "love", "ks", "2013");
-            await this.CacheHandler.AddOrUpdate(key1, d, DateTimeOffset.UtcNow.AddMinutes(1));
-
-            var key2 = this.CacheHandler.CreateKey<Report>("reports", "love", "ks", "2014");
-            await this.CacheHandler.AddOrUpdate(key2, d, DateTimeOffset.UtcNow.AddMinutes(1));
-
-            var key3 = this.CacheHandler.CreateKey<Report>("letter", "love", "ks", "2014");
-            await this.CacheHandler.AddOrUpdate(key3, d, DateTimeOffset.UtcNow.AddMinutes(1));
-
-            await this.CacheHandler.RemoveByPattern($"{this.Prefix}reports{this.Separator}love{this.Separator}ks{this.Separator}*");
-
-            var exists1 = await this.CacheHandler.Contains(key1);
-            var exists2 = await this.CacheHandler.Contains(key2);
-            var exists3 = await this.CacheHandler.Contains(key3);
-
-            Assert.IsFalse(exists1);
-            Assert.IsFalse(exists2);
-            Assert.IsTrue(exists3);
         }
 
         [Test]
@@ -315,17 +265,17 @@
         {
             var d = new Report();
 
-            var key = this.CacheHandler.CreateKey<Report>("reports", "football", "k4", "2014");
+            var key = this.CacheHandlers.CreateKey<Report>("reports", "football", "k4", "2014");
 
-            await this.CacheHandler.AddOrUpdate(key, d);
+            await this.CacheHandlers.AddOrUpdate(key, d);
 
-            var r1 = await this.CacheHandler.Contains(key);
+            var r1 = await this.CacheHandlers.Contains(key);
 
             Assert.IsTrue(r1);
 
-            var p = await this.CacheHandler.Purge();
+            var p = await this.CacheHandlers.Purge();
 
-            var r2 = await this.CacheHandler.Contains(key);
+            var r2 = await this.CacheHandlers.Contains(key);
 
             Assert.IsFalse(r2);
         }

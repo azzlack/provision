@@ -81,9 +81,12 @@
   <ItemGroup>
     <Compile Include="Extensions\CacheItemExtensions.cs" />
     <Compile Include="Interfaces\ICacheHandler.cs" />
+    <Compile Include="Interfaces\ICacheHandlerCollection.cs" />
     <Compile Include="Interfaces\ICacheHandlerConfiguration.cs" />
     <Compile Include="Interfaces\ICacheItem.cs" />
+    <Compile Include="Interfaces\ICacheProvider.cs" />
     <Compile Include="Interfaces\IExpires.cs" />
+    <Compile Include="Models\CacheHandlerCollection.cs" />
     <Compile Include="Providers\BaseCacheHandler.cs" />
     <Compile Include="Providers\BaseCacheHandlerConfiguration.cs" />
     <Compile Include="Models\CacheItem.cs" />

@@ -9,7 +9,7 @@ namespace Provision.Tests
     {
         public override void SetUp()
         {
-            this.CacheHandler = ProvisionConfiguration.Current.GetHandler();
+            this.CacheHandlers = ProvisionConfiguration.Current.GetHandlers();
 
             base.SetUp();
         }
@@ -17,7 +17,7 @@ namespace Provision.Tests
         [Test]
         public void Config_WhenCompressHaveBeenSetToFalse_ShouldReturnFalse()
         {
-            Assert.IsFalse(((RedisCacheHandlerConfiguration)this.CacheHandler.Configuration).Compress);
+            Assert.IsFalse(((RedisCacheHandlerConfiguration)this.CacheHandlers[1].Configuration).Compress);
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace Provision.Tests
+﻿using Provision.Models;
+
+namespace Provision.Tests
 {
     using NUnit.Framework;
     using Provision.Providers.MemoryCache;
@@ -8,8 +10,8 @@
     {
         public override void SetUp()
         {
-            this.CacheHandler = new MemoryCacheHandler();
-            this.CacheHandler.Purge().ConfigureAwait(false);
+            this.CacheHandlers = new CacheHandlerCollection() { new MemoryCacheHandler() };
+            this.CacheHandlers.Purge().ConfigureAwait(false);
 
             base.SetUp();
         }
