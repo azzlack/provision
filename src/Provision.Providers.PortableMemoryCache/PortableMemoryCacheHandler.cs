@@ -13,12 +13,14 @@
 
     public class PortableMemoryCacheHandler : BaseCacheHandler
     {
-        /// <summary>
-        /// The cache
-        /// </summary>
+        /// <summary>The cache.</summary>
         private ConcurrentDictionary<string, object> cache;
 
+        /// <summary>The cache tags.</summary>
         private readonly ConcurrentDictionary<string, HashSet<string>> cacheTags;
+
+        /// <summary>The configuration.</summary>
+        private readonly PortableMemoryCacheHandlerConfiguration configuration;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PortableMemoryCacheHandler"/> class.
@@ -33,9 +35,10 @@
         /// Initializes a new instance of the <see cref="PortableMemoryCacheHandler"/> class.
         /// </summary>
         /// <param name="configuration">The configuration.</param>
-        public PortableMemoryCacheHandler(ICacheHandlerConfiguration configuration)
+        public PortableMemoryCacheHandler(PortableMemoryCacheHandlerConfiguration configuration)
             : base(configuration)
         {
+            this.configuration = configuration;
             this.cacheTags = new ConcurrentDictionary<string, HashSet<string>>();
             this.cache = new ConcurrentDictionary<string, object>();
         }

@@ -1,4 +1,7 @@
-﻿namespace Provision.Providers.MemoryCache
+﻿using System.Collections.Specialized;
+using System.Globalization;
+
+namespace Provision.Providers.MemoryCache
 {
     using Provision.Extensions;
     using Provision.Interfaces;
@@ -18,6 +21,9 @@
         /// <summary>The cache.</summary>
         private MemoryCache cache;
 
+        /// <summary>The configuration.</summary>
+        private readonly MemoryCacheHandlerConfiguration configuration;
+
         /// <summary>Initializes a new instance of the <see cref="MemoryCacheHandler"/> class.</summary>
         public MemoryCacheHandler()
         {
@@ -27,10 +33,17 @@
 
         /// <summary>Initializes a new instance of the <see cref="MemoryCacheHandler"/> class.</summary>
         /// <param name="configuration">The configuration.</param>
-        public MemoryCacheHandler(ICacheHandlerConfiguration configuration)
+        public MemoryCacheHandler(MemoryCacheHandlerConfiguration configuration)
             : base(configuration)
         {
-            this.cache = new MemoryCache("Provision");
+            var memcacheConfig = new NameValueCollection();
+
+            if (configuration.MaxMemory > 0)
+            {
+                memcacheConfig.Add("cacheMemoryLimitMegabytes", (configuration.MaxMemory / 1000000).ToString(CultureInfo.InvariantCulture));
+            }
+
+            this.cache = new MemoryCache("Provision", memcacheConfig);
             this.tags = new ConcurrentDictionary<string, HashSet<string>>();
         }
 
