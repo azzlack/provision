@@ -73,12 +73,17 @@
         /// <returns>The cache item.</returns>
         public override async Task<ICacheItem<T>> Get<T>(string key)
         {
+            var empty = CacheItem<T>.Empty(key);
+            empty.CacheHandler = this.Configuration.Name;
+
             try
             {
                 var item = this.cache[key] as ICacheItem<T>;
 
                 if (item != null)
                 {
+                    item.CacheHandler = this.Configuration.Name;
+
                     // Set expiry date if applicable
                     item.MergeExpire();
 
@@ -89,7 +94,7 @@
 
                     if (item.Expires < DateTimeOffset.UtcNow)
                     {
-                        return CacheItem<T>.Empty(key);
+                        return empty;
                     }
 
                     return item;
@@ -99,7 +104,7 @@
             }
             catch (KeyNotFoundException)
             {
-                return CacheItem<T>.Empty(key);
+                return empty;
             }
         }
 

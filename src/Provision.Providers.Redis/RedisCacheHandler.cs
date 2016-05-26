@@ -241,7 +241,10 @@
                         this.log.DebugFormat("Retrieved cache item with key '{0}' and type '{1}'. It expires at {2}", key, typeof(T), expires);
                         this.log.InfoFormat("RedisCacheHandler.GetCacheItem<{2}>({1}) Time: {0}s", DateTimeOffset.UtcNow.Subtract(start).TotalSeconds, key, typeof(T));
 
-                        var ci = new CacheItem<T>(key, result, raw, expires);
+                        var ci = new CacheItem<T>(key, result, raw, expires)
+                        {
+                            CacheHandler = this.Configuration.Name
+                        };
                         ci.MergeExpire();
 
                         return ci;
@@ -259,7 +262,10 @@
 
             this.log.InfoFormat("(ERROR) RedisCacheHandler.GetCacheItem<{2}>({1}) Time: {0}s", DateTimeOffset.UtcNow.Subtract(start).TotalSeconds, key, typeof(T));
 
-            return CacheItem<T>.Empty(key);
+            var empty = CacheItem<T>.Empty(key);
+            empty.CacheHandler = this.Configuration.Name;
+
+            return empty;
         }
 
         /// <summary>Adds or updates a cache item with specified key and object.</summary>

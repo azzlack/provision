@@ -16,6 +16,10 @@
         /// <value>The raw value.</value>
         object RawValue { get; }
 
+        /// <summary>Gets or sets the cache handler name.</summary>
+        /// <value>The cache handler name.</value>
+        string CacheHandler { get; set; }
+
         /// <summary>Gets a value indicating whether this instance has value.</summary>
         /// <value><c>true</c> if this instance has value; otherwise, <c>false</c>.</value>
         bool HasValue { get; }

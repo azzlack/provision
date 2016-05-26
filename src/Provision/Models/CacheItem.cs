@@ -52,6 +52,10 @@
         /// <value>The expires.</value>
         public DateTimeOffset Expires { get; set; }
 
+        /// <summary>Gets or sets the cache handler name.</summary>
+        /// <value>The cache handler name.</value>
+        public string CacheHandler { get; set; }
+
         /// <summary>
         /// Gets or sets the key.
         /// </summary>

@@ -63,10 +63,15 @@
         /// <returns>The cache item.</returns>
         public override Task<ICacheItem<T>> Get<T>(string key)
         {
+            var empty = CacheItem<T>.Empty(key);
+            empty.CacheHandler = this.Configuration.Name;
+
             var item = this.cache.Get(key) as ICacheItem<T>;
 
             if (item != null)
             {
+                item.CacheHandler = this.Configuration.Name;
+
                 // Set expiry date if applicable
                 item.MergeExpire();
 
@@ -77,13 +82,13 @@
 
                 if (item.Expires < DateTimeOffset.UtcNow)
                 {
-                    return Task.FromResult(CacheItem<T>.Empty(key));
+                    return Task.FromResult(empty);
                 }
 
                 return Task.FromResult(item);
             }
 
-            return Task.FromResult(CacheItem<T>.Empty(key));
+            return Task.FromResult(empty);
         }
 
         /// <summary>Sets a cache item with specified key and object.</summary>
