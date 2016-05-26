@@ -35,8 +35,21 @@
         /// <summary>Gets the option with the specified key.</summary>
         public object this[string key] => this.options[key];
 
-        /// <summary>Gets or sets the name.</summary>
-        public string Name => this.options["name"] as string;
+        /// <summary>Gets the name.</summary>
+        public string Name
+        {
+            get
+            {
+                var n = this.options["name"] as string;
+
+                if (string.IsNullOrEmpty(n))
+                {
+                    return this.Type.Name;
+                }
+
+                return n;
+            }
+        }
 
         /// <summary>Gets the cache key prefix.</summary>
         /// <value>The cache key prefix.</value>

@@ -36,5 +36,15 @@ namespace Provision.Providers.MemoryCache
 
             this.Options["expireTime"] = $"0 {fraction} * * * ?";
         }
+
+        /// <summary>
+        /// Gets or sets the maximum amount if memory in bytes the cache is allowed to use.
+        /// The cache will utilize a FIFO pattern if the cache is full.
+        /// </summary>
+        public double MaxMemory
+        {
+            get { return this.GetPropertyValue<double>("maxMemory"); }
+            set { this.Options["maxMemory"] = value; }
+        }
     }
 }
