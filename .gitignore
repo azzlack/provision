@@ -176,3 +176,4 @@ FakesAssemblies/
 dist/nuget/*/src/
 dist/nuget/*/lib/
 dist/nuget/*/content/
+dist/*.nupkg
