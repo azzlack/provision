@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>Provision</id>
-    <version>2.0.0</version>
+    <version>3.0.0</version>
     <title>Provision</title>
     <authors>Ove Andersen</authors>
     <owners>EyeCatch</owners>
@@ -18,9 +18,12 @@
 
 NOTE: Provision requires a provider to work, please download one of the Provision.Providers packages.</description>
     <summary>An easy-to-use and fast caching framework for .NET with support for many storage systems.</summary>
-	<releaseNotes>https://github.com/azzlack/provision/issues?q=is:issue+milestone:2.0.0</releaseNotes>
-    <copyright>Copyright EyeCatch 2015</copyright>
+	<releaseNotes>https://github.com/azzlack/provision/issues?q=is:issue+milestone:3.0.0</releaseNotes>
+    <copyright>Copyright EyeCatch 2016</copyright>
     <language>en-US</language>
     <tags>caching redis memory portable provision eyecatch</tags>
+    <dependencies>
+      <dependency id="C5" version="2.4.5947.17249" />
+    </dependencies>
   </metadata>
 </package>

@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>Provision.Providers.PortableMemoryCache</id>
-    <version>2.0.0</version>
+    <version>3.0.0</version>
     <title>Portable Memory Cache support for Provision</title>
     <authors>Ove Andersen</authors>
     <owners>EyeCatch</owners>
@@ -11,12 +11,12 @@
     <iconUrl>http://www.eyecatch.no/favicon.ico</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Adds support to the Provision package for using a portable thread-safe collection as cache backend.</description>
-    <releaseNotes>https://github.com/azzlack/provision/issues?q=is:issue+milestone:2.0.0</releaseNotes>
-    <copyright>Copyright EyeCatch 2015</copyright>
+    <releaseNotes>https://github.com/azzlack/provision/issues?q=is:issue+milestone:3.0.0</releaseNotes>
+    <copyright>Copyright EyeCatch 2016</copyright>
     <language>en-US</language>
     <tags>caching memory portable thread-safe provision eyecatch</tags>
     <dependencies>
-      <dependency id="Provision" version="2.0.0" />
+      <dependency id="Provision" version="3.0.0" />
     </dependencies>
   </metadata>
 </package>
