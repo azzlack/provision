@@ -7,13 +7,13 @@ An easy-to-use and fast caching framework for .NET with support for many storage
 * [System.Runtime.Caching.MemoryCache](http://msdn.microsoft.com/en-us/library/system.runtime.caching.memorycache(v=vs.110).aspx)
 * Portable Memory Cache for use with Windows Store, Windows Phone 8, Xamarin apps
 
-| Package | Description | Downloads | Version |
-| --- | --- | --- | --- |
-| `Provision` | <sub><sup>The cache handler core</sup></sub> | [![NuGet Downloads](https://img.shields.io/nuget/dt/Provision.svg?style=flat-square)](https://www.nuget.org/packages/Provision) | [![NuGet Version](https://img.shields.io/nuget/v/Provision.svg?style=flat-square)](https://www.nuget.org/packages/Provision) |
-| `Provision.Config` | <sub><sup>Config file support</sup></sub> | [![NuGet Downloads](https://img.shields.io/nuget/dt/Provision.Config.svg?style=flat-square)](https://www.nuget.org/packages/Provision.Config) | [![NuGet Version](https://img.shields.io/nuget/v/Provision.Config.svg?style=flat-square)](https://www.nuget.org/packages/Provision.Config) |
-| `Provision.Providers.Redis` | <sub><sup>A cache handler using [Redis](http://redis.io/) for storage</sup></sub> | [![NuGet Downloads](https://img.shields.io/nuget/dt/Provision.Providers.Redis.svg?style=flat-square)](https://www.nuget.org/packages/Provision.Providers.Redis) | [![NuGet Version](https://img.shields.io/nuget/v/Provision.Providers.Redis.svg?style=flat-square)](https://www.nuget.org/packages/Provision.Providers.Redis) |
-| `Provision.Providers.MemoryCache` | <sub><sup>A cache handlerr using `System.Runtime.Cache` for storage</sup></sub> | [![NuGet Downloads](https://img.shields.io/nuget/dt/Provision.Providers.MemoryCache.svg?style=flat-square)](https://www.nuget.org/packages/Provision.Providers.MemoryCache) | [![NuGet Version](https://img.shields.io/nuget/v/Provision.Providers.MemoryCache.svg?style=flat-square)](https://www.nuget.org/packages/Provision.Providers.MemoryCache) |
-| `Provision.Providers.PortableMemoryCache` | <sub><sup>A cache handler using a cross-platform memory table for storage</sup></sub> | [![NuGet Downloads](https://img.shields.io/nuget/dt/Provision.Providers.PortableMemoryCache.svg?style=flat-square)](https://www.nuget.org/packages/Provision.Providers.PortableMemoryCache) | [![NuGet Version](https://img.shields.io/nuget/v/Provision.Providers.PortableMemoryCache.svg?style=flat-square)](https://www.nuget.org/packages/Provision.Providers.PortableMemoryCache) |
+| Package | Description  | Version |
+| --- | --- | --- |
+| `Provision` | <sub><sup>The cache handler core</sup></sub> | [![NuGet Version](https://img.shields.io/nuget/v/Provision.svg?style=flat-square)](https://www.nuget.org/packages/Provision) |
+| `Provision.Config` | <sub><sup>Config file support</sup></sub> | [![NuGet Version](https://img.shields.io/nuget/v/Provision.Config.svg?style=flat-square)](https://www.nuget.org/packages/Provision.Config) |
+| `Provision.Providers.Redis` | <sub><sup>A cache handler using [Redis](http://redis.io/) for storage</sup></sub> | 
+| `Provision.Providers.MemoryCache` | <sub><sup>A cache handlerr using `System.Runtime.Cache` for storage</sup></sub> | [![NuGet Version](https://img.shields.io/nuget/v/Provision.Providers.MemoryCache.svg?style=flat-square)](https://www.nuget.org/packages/Provision.Providers.MemoryCache) |
+| `Provision.Providers.PortableMemoryCache` | <sub><sup>A cache handler using a cross-platform memory table for storage</sup></sub> | [![NuGet Version](https://img.shields.io/nuget/v/Provision.Providers.PortableMemoryCache.svg?style=flat-square)](https://www.nuget.org/packages/Provision.Providers.PortableMemoryCache) |
 
 ### Usage
 #### Default configuration
@@ -27,7 +27,7 @@ var cacheHandler = new PortableMemoryCacheHandler(new PortableMemoryCacheHandler
 ```
 #### Configure from app.config or web.config
 ```csharp
-var cacheHandler = ProvisionConfiguration.Current.GetHandler();
+var cacheHandlers = ProvisionConfiguration.Current.GetHandlers();
 ```
 ```xml
 <configuration>
@@ -39,6 +39,16 @@ var cacheHandler = ProvisionConfiguration.Current.GetHandler();
 		<!-- Expires all items automatically after 1 hour if nothing else is specified when adding the item to the cache -->
 	</provision>
 </configuration>
+```
+#### Support for tiered caching
+The `CacheHandlerCollection` is used like a cachehandler, meaning you just use `AddOrUpdate`, `Contains`, `Get`, etc like normal.  
+Provision will contact the handlers behind the scenes.
+```csharp
+var cacheHandlers = new CacheHandlerCollection()
+            {
+                new MemoryCacheHandler(new MemoryCacheHandlerConfiguration(TimeSpan.FromSeconds(30))),
+                new RedisCacheHandler(new RedisCacheHandlerConfiguration("localhost", 6379, 3, null, "provision", 512, null, true))
+            };
 ```
 #### Add object to cache
 ```csharp
