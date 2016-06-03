@@ -15,16 +15,13 @@ namespace Provision.Config
         /// <summary>The cache handler.</summary>
         private ICacheHandlerCollection cacheHandlers;
 
+        /// <summary>The cache handler configurations.</summary>
+        private IList<ICacheHandlerConfiguration> cacheHandlerConfigurations;
+
         /// <summary>
         /// The settings
         /// </summary>
         private static readonly Lazy<IProvisionConfiguration> Instance = new Lazy<IProvisionConfiguration>(() => ConfigurationManager.GetSection("provision") as ProvisionConfiguration);
-
-        /// <summary>Prevents a default instance of the <see cref="ProvisionConfiguration" /> class from being created.</summary>
-        private ProvisionConfiguration()
-        {
-            this.cacheHandlers = new CacheHandlerCollection();
-        }
 
         /// <summary>
         /// Gets the settings.
@@ -66,6 +63,11 @@ namespace Provision.Config
         /// <returns>The cache handler.</returns>
         public ICacheHandlerCollection GetHandlers(IList<ICacheHandlerConfiguration> configuration)
         {
+            if (this.cacheHandlers != null)
+            {
+                return this.cacheHandlers;
+            }
+
             var handlers = new List<ICacheHandler>();
 
             foreach (var cacheHandlerConfiguration in configuration)
@@ -82,7 +84,7 @@ namespace Provision.Config
         /// <returns>The configuration.</returns>
         public IList<ICacheHandlerConfiguration> GetCacheHandlerConfigurations()
         {
-            return this.Providers.GetConfigurations();
+            return this.cacheHandlerConfigurations ?? (this.cacheHandlerConfigurations = this.Providers.GetConfigurations());
         }
     }
 }
