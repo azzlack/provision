@@ -13,7 +13,6 @@
     using System.Linq;
     using System.Security.Cryptography;
     using System.Text;
-    using System.Text.RegularExpressions;
     using System.Threading.Tasks;
 
     /// <summary>
@@ -308,28 +307,22 @@
                             var k = key.Split('#')[1];
 
                             // Add data to db
-                            inserted = await db.HashSetAsync(h, k, data);
+                            await db.HashSetAsync(h, k, data, flags: CommandFlags.FireAndForget);
 
                             // Make item expire
-                            await db.KeyExpireAsync(h, expires.UtcDateTime);
+                            await db.KeyExpireAsync(h, expires.UtcDateTime, flags: CommandFlags.FireAndForget);
                         }
                         else
                         {
                             // Add data to db
-                            inserted = await db.StringSetAsync(key, data);
+                            await db.StringSetAsync(key, data, flags: CommandFlags.FireAndForget);
 
                             // Make item expire
-                            await db.KeyExpireAsync(key, expires.UtcDateTime);
+                            await db.KeyExpireAsync(key, expires.UtcDateTime, flags: CommandFlags.FireAndForget);
                         }
 
                         await this.AddOrUpdateKeyIndex(key, expires);
                         await this.AddOrUpdateTagIndex(tags, key, expires);
-
-                        this.log.DebugFormat(
-                            inserted
-                                ? "Successfully inserted cache item with key '{0}'"
-                                : "Successfully updated cache item with key '{0}'",
-                            key);
 
                         // Set expires time if item is expireable
                         if (typeof(IExpires).IsAssignableFrom(typeof(T)) && expires.UtcDateTime > DateTimeOffset.UtcNow)
@@ -348,7 +341,7 @@
                     }
                     catch (Exception ex)
                     {
-                        this.log.Error(string.Format("Error when inserting value '{0}' for key '{1}' to database", item, key), ex);
+                        this.log.Error($"Error when inserting value '{item}' for key '{key}' to database", ex);
                     }
                 }
                 catch (Exception ex)
@@ -392,11 +385,11 @@
                         var h = key.Split('#')[0];
                         var k = key.Split('#')[1];
 
-                        removed = await db.HashDeleteAsync(h, k);
+                        removed = await db.HashDeleteAsync(h, k, flags: CommandFlags.FireAndForget);
                     }
                     else
                     {
-                        removed = await db.KeyDeleteAsync(key);
+                        removed = await db.KeyDeleteAsync(key, flags: CommandFlags.FireAndForget);
                     }
 
                     if (!removed)
@@ -458,8 +451,8 @@
                             }
                         }
 
-                        await db.KeyDeleteAsync(keys.ToArray());
-                        await db.KeyDeleteAsync(tagKey);
+                        await db.KeyDeleteAsync(keys.ToArray(), flags: CommandFlags.FireAndForget);
+                        await db.KeyDeleteAsync(tagKey, flags: CommandFlags.FireAndForget);
                     }
                 }
                 catch (Exception ex)
@@ -522,11 +515,11 @@
                     }
 
                     // Delete keys
-                    await db.KeyDeleteAsync(keys.ToArray());
+                    await db.KeyDeleteAsync(keys.ToArray(), flags: CommandFlags.FireAndForget);
 
                     // Delete indexes
-                    await db.KeyDeleteAsync(this.configuration.IndexKey);
-                    await db.KeyDeleteAsync(this.configuration.TagKey);
+                    await db.KeyDeleteAsync(this.configuration.IndexKey, flags: CommandFlags.FireAndForget);
+                    await db.KeyDeleteAsync(this.configuration.TagKey, flags: CommandFlags.FireAndForget);
                 }
                 catch (Exception ex)
                 {
@@ -554,7 +547,10 @@
 
             foreach (var tag in tags)
             {
-                await db.SortedSetAddAsync($"{this.configuration.TagKey}{this.configuration.Separator}{tag}", key, expires.ToUnixTime());
+                await
+                    db.SortedSetAddAsync($"{this.configuration.TagKey}{this.configuration.Separator}{tag}", key,
+                        expires.ToUnixTime(), 
+                        flags: CommandFlags.FireAndForget);
             }
         }
 
@@ -574,11 +570,11 @@
             {
                 var newScore = (score - oldScore.Value) > DateTimeOffsetExtensions.Epoch.ToUnixTime() ? score - oldScore.Value : DateTimeOffsetExtensions.Epoch.ToUnixTime();
 
-                await db.SortedSetIncrementAsync(this.configuration.IndexKey, key, newScore);
+                await db.SortedSetIncrementAsync(this.configuration.IndexKey, key, newScore, flags: CommandFlags.FireAndForget);
             }
             else
             {
-                await db.SortedSetAddAsync(this.configuration.IndexKey, key, score);
+                await db.SortedSetAddAsync(this.configuration.IndexKey, key, score, flags: CommandFlags.FireAndForget);
             }
         }
     }
