@@ -9,7 +9,10 @@ namespace Provision.Tests
     {
         public override void SetUp()
         {
-            this.CacheHandlers = new CacheHandlerCollection() { new RedisCacheHandler(new RedisCacheHandlerConfiguration("localhost", 6379, 3, null, "provision", 512, null, true)) };
+            this.CacheHandlers =
+                new CacheHandlerCollection(
+                    new RedisCacheHandler(new RedisCacheHandlerConfiguration("localhost", 6379, 3, null, "provision",
+                        512, null, true)));
 
             base.SetUp();
         }

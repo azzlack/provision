@@ -13,7 +13,7 @@ namespace Provision.Config
     public class ProvisionConfiguration : ConfigurationSection, IProvisionConfiguration
     {
         /// <summary>The cache handler.</summary>
-        private readonly ICacheHandlerCollection cacheHandlers;
+        private ICacheHandlerCollection cacheHandlers;
 
         /// <summary>
         /// The settings
@@ -66,14 +66,16 @@ namespace Provision.Config
         /// <returns>The cache handler.</returns>
         public ICacheHandlerCollection GetHandlers(IList<ICacheHandlerConfiguration> configuration)
         {
+            var handlers = new List<ICacheHandler>();
+
             foreach (var cacheHandlerConfiguration in configuration)
             {
                 var handler = Activator.CreateInstance(cacheHandlerConfiguration.Type, cacheHandlerConfiguration) as ICacheHandler;
 
-                this.cacheHandlers.Add(handler);
+                handlers.Add(handler);
             }
 
-            return this.cacheHandlers;
+            return (this.cacheHandlers = new CacheHandlerCollection(handlers));
         }
 
         /// <summary>Gets the configuration.</summary>

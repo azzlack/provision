@@ -10,7 +10,7 @@ namespace Provision.Tests
     {
         public override void SetUp()
         {
-            this.CacheHandlers = new CacheHandlerCollection() { new MemoryCacheHandler() };
+            this.CacheHandlers = new CacheHandlerCollection(new MemoryCacheHandler());
             this.CacheHandlers.Purge().ConfigureAwait(false);
 
             base.SetUp();

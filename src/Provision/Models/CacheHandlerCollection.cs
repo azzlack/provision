@@ -1,14 +1,52 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Provision.Interfaces;
 
 namespace Provision.Models
 {
-    public class CacheHandlerCollection : List<ICacheHandler>, ICacheHandlerCollection
+    public class CacheHandlerCollection : ICacheHandlerCollection
     {
+        /// <summary>The cache handlers.</summary>
+        private readonly IEnumerable<ICacheHandler> cacheHandlers;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CacheHandlerCollection" /> class.
+        /// </summary>
+        /// <param name="cacheHandlers">
+        /// A variable-length parameters list containing cache handlers.
+        /// </param>
+        public CacheHandlerCollection(params ICacheHandler[] cacheHandlers)
+        {
+            this.cacheHandlers = cacheHandlers;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CacheHandlerCollection" /> class.
+        /// </summary>
+        /// <param name="cacheHandlers">
+        /// A variable-length parameters list containing cache handlers.
+        /// </param>
+        public CacheHandlerCollection(IEnumerable<ICacheHandler> cacheHandlers)
+        {
+            this.cacheHandlers = cacheHandlers;
+        }
+
+        /// <summary>Gets the cache handler at the specified index.</summary>
+        /// <param name="index">The index.</param>
+        /// <returns>The cache handler if it exists.</returns>
+        public ICacheHandler this[int index] => this.cacheHandlers.ElementAtOrDefault(index);
+
+        /// <summary>Gets the cache handler with the specified name.</summary>
+        /// <param name="name">The name.</param>
+        /// <returns>The cache handler if it exists.</returns>
+        public ICacheHandler this[string name]
+        {
+            get { return this.cacheHandlers.FirstOrDefault(x => x.Configuration.Name == name); }
+        }
+
         /// <summary>Creates a cache item key from the specified segments.</summary>
         /// <typeparam name="T">The type to create a cache key for.</typeparam>
         /// <param name="segments">The key segments.</param>
@@ -43,7 +81,7 @@ namespace Provision.Models
         /// <returns><c>true</c> if a cache item exists, <c>false</c> otherwise.</returns>
         public async Task<bool> Contains(string key)
         {
-            foreach (var handler in this)
+            foreach (var handler in this.cacheHandlers)
             {
                 var k = handler.CreateKey(key.Split('_'));
                 if (await handler.Contains(k))
@@ -61,7 +99,7 @@ namespace Provision.Models
         /// <returns>The cache item.</returns>
         public async Task<ICacheItem<T>> Get<T>(string key)
         {
-            foreach (var handler in this)
+            foreach (var handler in this.cacheHandlers)
             {
                 var k = handler.CreateKey<T>(key.Split('_'));
                 var cacheItem = await handler.Get<T>(k);
@@ -83,7 +121,7 @@ namespace Provision.Models
         {
             var cacheItems = new List<ICacheItem<T>>();
 
-            foreach (var handler in this)
+            foreach (var handler in this.cacheHandlers)
             {
                 var c = await handler.GetByTag<T>(tags);
 
@@ -100,7 +138,7 @@ namespace Provision.Models
         /// <returns>The cache item.</returns>
         public async Task<TWrapper> GetAs<TWrapper, TValue>(string key) where TWrapper : ICacheItem<TValue>
         {
-            foreach (var handler in this)
+            foreach (var handler in this.cacheHandlers)
             {
                 var k = handler.CreateKey<TValue>(key.Split('_'));
                 var cacheItem = await handler.GetAs<TWrapper, TValue>(k);
@@ -120,7 +158,7 @@ namespace Provision.Models
         /// <returns>The cache item.</returns>
         public async Task<T> GetValue<T>(string key)
         {
-            foreach (var handler in this)
+            foreach (var handler in this.cacheHandlers)
             {
                 var k = handler.CreateKey<T>(key.Split('_'));
                 var c = await handler.GetValue<T>(k);
@@ -142,7 +180,7 @@ namespace Provision.Models
         /// <returns>A task.</returns>
         public async Task<T> AddOrUpdate<T>(string key, T item, params string[] tags)
         {
-            foreach (var handler in this)
+            foreach (var handler in this.cacheHandlers)
             {
                 var k = handler.CreateKey<T>(key.Split('_'));
                 var c = await handler.AddOrUpdate(k, item, tags);
@@ -165,7 +203,7 @@ namespace Provision.Models
         /// <returns>The added or updated value.</returns>
         public async Task<T> AddOrUpdate<T>(string key, T item, DateTimeOffset expires, params string[] tags)
         {
-            foreach (var handler in this)
+            foreach (var handler in this.cacheHandlers)
             {
                 var k = handler.CreateKey<T>(key.Split('_'));
                 var c = await handler.AddOrUpdate(k, item, expires, tags);
@@ -186,7 +224,7 @@ namespace Provision.Models
         {
             var result = false;
 
-            foreach (var handler in this)
+            foreach (var handler in this.cacheHandlers)
             {
                 var k = handler.CreateKey(key.Split('_'));
                 result = await handler.RemoveByKey(k);
@@ -202,7 +240,7 @@ namespace Provision.Models
         {
             var result = false;
 
-            foreach (var handler in this)
+            foreach (var handler in this.cacheHandlers)
             {
                 result = await handler.RemoveByTag(tags);
             }
@@ -216,12 +254,22 @@ namespace Provision.Models
         {
             var result = false;
 
-            foreach (var handler in this)
+            foreach (var handler in this.cacheHandlers)
             {
                 result = await handler.Purge();
             }
 
             return result;
+        }
+
+        public IEnumerator<ICacheHandler> GetEnumerator()
+        {
+            throw new NotImplementedException();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }

@@ -10,7 +10,7 @@ namespace Provision.Tests
     {
         public override void SetUp()
         {
-            this.CacheHandlers = new CacheHandlerCollection() { new PortableMemoryCacheHandler() };
+            this.CacheHandlers = new CacheHandlerCollection(new PortableMemoryCacheHandler());
 
             base.SetUp();
         }
