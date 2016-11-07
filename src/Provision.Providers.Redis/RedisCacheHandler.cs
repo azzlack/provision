@@ -284,10 +284,11 @@
                 {
                     var db = this.configuration.Connection.GetDatabase();
 
+                    // Remove expired keys
+                    await this.RemoveExpiredKeys();
+
                     try
                     {
-                        bool inserted;
-
                         byte[] data;
 
                         // If compression is specified, compress data before inserting into database
@@ -451,8 +452,12 @@
                             }
                         }
 
+                        // Delete keys
                         await db.KeyDeleteAsync(keys.ToArray(), flags: CommandFlags.FireAndForget);
                         await db.KeyDeleteAsync(tagKey, flags: CommandFlags.FireAndForget);
+
+                        // Delete tag index
+                        await db.SetRemoveAsync(this.configuration.TagKey, tag);
                     }
                 }
                 catch (Exception ex)
@@ -460,7 +465,6 @@
                     this.log.Error(ex);
                     return false;
                 }
-
             }
             catch (Exception ex)
             {
@@ -536,6 +540,36 @@
             return purged;
         }
 
+        /// <summary>Removes the expired keys.</summary>
+        /// <returns>The number of keys removed.</returns>
+        public async Task<long> RemoveExpiredKeys()
+        {
+            var db = this.configuration.Connection.GetDatabase();
+
+            var keysRemoved = 0L;
+
+            // Remove keys
+            keysRemoved += await db.SortedSetRemoveRangeByScoreAsync(this.configuration.IndexKey, 0, DateTimeOffset.UtcNow.ToUnixTime());
+
+            // Remove tags
+            var tags = db.SetScan(this.configuration.TagKey);
+            foreach (var tag in tags)
+            {
+                keysRemoved += await db.SortedSetRemoveRangeByScoreAsync($"{this.configuration.TagKey}{this.configuration.Separator}{tag}", 0, DateTimeOffset.UtcNow.ToUnixTime());
+            }
+
+            this.log.Debug($"Removed {keysRemoved} expired keys");
+
+            return keysRemoved;
+        }
+
+        /// <summary>Gets the database connection.</summary>
+        /// <returns>The database connection.</returns>
+        public IDatabase GetDatabase()
+        {
+            return this.configuration.Connection.GetDatabase();
+        }
+
         /// <summary>Adds or updates the specified tag collections with the specified key.</summary>
         /// <param name="tags">The tags.</param>
         /// <param name="key">The cache key.</param>
@@ -544,12 +578,18 @@
         private async Task AddOrUpdateTagIndex(string[] tags, string key, DateTimeOffset expires)
         {
             var db = this.configuration.Connection.GetDatabase();
-
+            
             foreach (var tag in tags)
             {
+                // Create tag set
+                await db.SetAddAsync($"{this.configuration.TagKey}", tag);
+                
+                // Store key
                 await
-                    db.SortedSetAddAsync($"{this.configuration.TagKey}{this.configuration.Separator}{tag}", key,
-                        expires.ToUnixTime(), 
+                    db.SortedSetAddAsync(
+                        $"{this.configuration.TagKey}{this.configuration.Separator}{tag}",
+                        key,
+                        expires.ToUnixTime(),
                         flags: CommandFlags.FireAndForget);
             }
         }
