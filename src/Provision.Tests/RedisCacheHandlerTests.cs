@@ -35,6 +35,17 @@ namespace Provision.Tests
         }
 
         [Test]
+        public async void Get_WhenServerIsDown_ReturnsNull()
+        {
+            var ch = new RedisCacheHandler(new RedisCacheHandlerConfiguration("test"));
+
+            var v = await ch.Get<Report>("test");
+
+            Assert.IsFalse(v.HasValue);
+            Assert.IsNull(v.Value);
+        }
+
+        [Test]
         public async void RemoveExpiredKeys_WhenAddingItem_ShouldRemoveExpiredKeys()
         {
             var ch = new RedisCacheHandler(new RedisCacheHandlerConfiguration(prefix: "RemoveExpiredKeys_WhenAddingItem_ShouldRemoveExpiredKeys"));

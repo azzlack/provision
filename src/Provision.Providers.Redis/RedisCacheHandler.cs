@@ -61,13 +61,12 @@
             this.log = log;
         }
 
-        /// <summary>
-        /// Creates a cache item key from the specified segments.
-        /// </summary>
-        /// <typeparam name="T">The type to create a cache key for.</typeparam>
+        /// <summary>Creates a cache item key from the specified segments.</summary>
+        /// <exception cref="ArgumentException">
+        /// Thrown when one or more arguments have unsupported or illegal values.
+        /// </exception>
         /// <param name="segments">The key segments.</param>
         /// <returns>A cache item key.</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="format" /> is null. </exception>
         public override string CreateKey(params object[] segments)
         {
             // Throw exception if any segment is null
